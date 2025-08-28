@@ -1,0 +1,740 @@
+[
+  {
+    "orcid": "0000-0003-3940-9551",
+    "scopus_id": 6701563971,
+    "first_name": "Jamal",
+    "last_name": "Abdalla",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6701563971"
+  },
+  {
+    "orcid": "0000-0002-9010-4094",
+    "scopus_id": 13410407400,
+    "first_name": "Mamoun",
+    "last_name": "Abdel-Hafez",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering | HOD & Coord.Mechatr.Grad.Prog.",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=13410407400"
+  },
+  {
+    "orcid": "0000-0002-2031-685X",
+    "scopus_id": 58953538100,
+    "first_name": "Nabil",
+    "last_name": "Abdel Jabbar",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603412923"
+  },
+  {
+    "orcid": "0000-0001-7709-9932",
+    "scopus_id": 6603311831,
+    "first_name": "Akmal",
+    "last_name": "Abdelfatah",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603311831"
+  },
+  {
+    "orcid": "0000-0001-6711-1336",
+    "scopus_id": 6508318697,
+    "first_name": "Mohamed",
+    "last_name": "Abdelgawad",
+    "department": "MCE",
+    "designation": "Associate Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6508318697"
+  },
+  {
+    "orcid": "0000-0002-9202-694X",
+    "scopus_id": 6602685673,
+    "first_name": "Farid",
+    "last_name": "Abed",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602685673"
+  },
+  {
+    "orcid": "0000-0002-9500-8093",
+    "scopus_id": 14519171800,
+    "first_name": "Bassam",
+    "last_name": "Abu-Nabah",
+    "department": "MCE",
+    "designation": "Associate Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=14519171800"
+  },
+  {
+    "orcid": "0009-0002-1364-0229",
+    "scopus_id": 57197175008,
+    "first_name": "Reham",
+    "last_name": "Aburas",
+    "department": "CSE",
+    "designation": "Assistant Professor Computer Science",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57197175008"
+  },
+  {
+    "orcid": "0000-0003-2695-5836",
+    "scopus_id": 16038508600,
+    "first_name": "Raafat",
+    "last_name": "Aburukba",
+    "department": "CSE",
+    "designation": "Associate Professor Computer Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=16038508600"
+  },
+  {
+    "orcid": "0000-0002-1306-9766",
+    "scopus_id": 35298399800,
+    "first_name": "Wael",
+    "last_name": "Abuzaid",
+    "department": "MCE",
+    "designation": "Associate Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=35298399800"
+  },
+  {
+    "orcid": "0000-0002-5071-5253",
+    "scopus_id": 57191261382,
+    "first_name": "Ahmed Maged",
+    "last_name": "Ahmed",
+    "department": "INE",
+    "designation": "Assistant Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57191261382"
+  },
+  {
+    "orcid": "0000-0002-1176-6509",
+    "scopus_id": 6603081884,
+    "first_name": "Vian",
+    "last_name": "Ahmed",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603081884"
+  },
+  {
+    "orcid": "0000-0002-6902-5092",
+    "scopus_id": 7005259343,
+    "first_name": "Abdulrahman",
+    "last_name": "Al-Ali",
+    "department": "CSE",
+    "designation": "Professor Computer Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7005259343"
+  },
+  {
+    "orcid": "0000-0003-1012-427X",
+    "scopus_id": 7003787914,
+    "first_name": "Sameer",
+    "last_name": "Al-Asheh",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering | HOD& Coord.Biomed EGP",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7003787914"
+  },
+  {
+    "orcid": "0000-0002-2578-9824",
+    "scopus_id": 57197945689,
+    "first_name": "Amani",
+    "last_name": "Al-Othman",
+    "department": "CHBE",
+    "designation": "Associate Professor Chemical Engineering | Petrofac Research Chair Ren.Ener",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57197945689"
+  },
+  {
+    "orcid": "0000-0002-9685-4937",
+    "scopus_id": 6701686599,
+    "first_name": "Hasan",
+    "last_name": "Al Nashash",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering | Coordinator of PhD in Biosciences and Bioengineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6701686599"
+  },
+  {
+    "orcid": "0000-0001-5933-0280",
+    "scopus_id": 6602880623,
+    "first_name": "Lutfi",
+    "last_name": "Albasha",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602880623"
+  },
+  {
+    "orcid": "0000-0003-1480-8054",
+    "scopus_id": 56901114900,
+    "first_name": "Mohamed",
+    "last_name": "AlHajri",
+    "department": "CSE",
+    "designation": "Assistant Professor Computer Science and Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=56901114900"
+  },
+  {
+    "orcid": "0000-0002-5004-0778",
+    "scopus_id": 36015247500,
+    "first_name": "Mohammad",
+    "last_name": "AlHamaydeh",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=36015247500"
+  },
+  {
+    "orcid": "0000-0001-5884-7464",
+    "scopus_id": 57203070870,
+    "first_name": "Tarig",
+    "last_name": "Ali",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57203070870"
+  },
+  {
+    "orcid": "0000-0003-2924-0780",
+    "scopus_id": 55317855100,
+    "first_name": "Faisal",
+    "last_name": "Alkaabneh",
+    "department": "INE",
+    "designation": "Assistant Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55317855100"
+  },
+  {
+    "orcid": "0000-0002-9650-3168",
+    "scopus_id": 24385607100,
+    "first_name": "Maen",
+    "last_name": "Alkhader",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=24385607100"
+  },
+  {
+    "orcid": "0000-0001-5129-7789",
+    "scopus_id": 6601962378,
+    "first_name": "Fadi",
+    "last_name": "Aloul",
+    "department": "CSE",
+    "designation": "Dean",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6601962378"
+  },
+  {
+    "orcid": "0000-0003-1975-9861",
+    "scopus_id": 55312769200,
+    "first_name": "Hussam",
+    "last_name": "Alshraideh",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55312769200"
+  },
+  {
+    "orcid": "0000-0002-2190-6499",
+    "scopus_id": 6701755723,
+    "first_name": "Ihab",
+    "last_name": "Amer",
+    "department": "CSE",
+    "designation": "Professor of Practice Computer Engineering",
+    "scopus_url": ""
+  },
+  {
+    "orcid": "0000-0002-4747-9579",
+    "scopus_id": 36023558300,
+    "first_name": "Rami Afif",
+    "last_name": "As'ad",
+    "department": "INE",
+    "designation": "Associate Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=36023558300"
+  },
+  {
+    "orcid": "0000-0002-6238-3209",
+    "scopus_id": 6506787827,
+    "first_name": "Serter",
+    "last_name": "Atabay",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6506787827"
+  },
+  {
+    "orcid": "0000-0002-2755-9045",
+    "scopus_id": 6602338907,
+    "first_name": "Mousa",
+    "last_name": "Attom",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602338907"
+  },
+  {
+    "orcid": "0000-0003-2999-9084",
+    "scopus_id": 57611029100,
+    "first_name": "Mahmoud",
+    "last_name": "Awad",
+    "department": "INE",
+    "designation": "Associate Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=14026326300"
+  },
+  {
+    "orcid": "0000-0003-2832-3672",
+    "scopus_id": 6506687434,
+    "first_name": "Zied",
+    "last_name": "Bahroun",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6506687434"
+  },
+  {
+    "orcid": "0000-0002-1112-395X",
+    "scopus_id": 7003329717,
+    "first_name": "Mohamed",
+    "last_name": "Ben-Daya",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7003329717"
+  },
+  {
+    "orcid": "0000-0003-3673-3612",
+    "scopus_id": 6701325845,
+    "first_name": "Rachid",
+    "last_name": "Chebbi",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6701325845"
+  },
+  {
+    "orcid": "0000-0002-9399-5769",
+    "scopus_id": 57193881849,
+    "first_name": "Mohammad",
+    "last_name": "Daoud",
+    "department": "CSE",
+    "designation": "Professor of Practice Computer Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57193881849"
+  },
+  {
+    "orcid": "0000-0001-5097-6034",
+    "scopus_id": 7003435750,
+    "first_name": "Basil",
+    "last_name": "Darras",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7003435750"
+  },
+  {
+    "orcid": "0000-0001-6314-582X",
+    "scopus_id": 7006568104,
+    "first_name": "Naif",
+    "last_name": "Darwish",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7006568104"
+  },
+  {
+    "orcid": "0000-0002-2196-2749",
+    "scopus_id": 57190255215,
+    "first_name": "Dana",
+    "last_name": "Dghaym",
+    "department": "CSE",
+    "designation": "Assistant Professor Computer Science and Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57190255215"
+  },
+  {
+    "orcid": "0000-0001-5040-6947",
+    "scopus_id": 6603543077,
+    "first_name": "Rached",
+    "last_name": "Dhaouadi",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603543077"
+  },
+  {
+    "orcid": "0000-0002-8143-6417",
+    "scopus_id": 55560381000,
+    "first_name": "Salam",
+    "last_name": "Dhou",
+    "department": "CSE",
+    "designation": "Associate Professor Computer Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55560381000"
+  },
+  {
+    "orcid": "0000-0002-2329-6639",
+    "scopus_id": 12139749100,
+    "first_name": "Magdi",
+    "last_name": "El-Emam",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=12139749100"
+  },
+  {
+    "orcid": "0000-0002-2343-2848",
+    "scopus_id": 35619775900,
+    "first_name": "Khaled",
+    "last_name": "El-Fakih",
+    "department": "CSE",
+    "designation": "Professor Computer Science",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=35619775900"
+  },
+  {
+    "orcid": "0000-0002-9127-0318",
+    "scopus_id": 15071497400,
+    "first_name": "Sameh",
+    "last_name": "El-Sayegh",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering | HOD & Coord.MS in Constr.Mgt.",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=15071497400"
+  },
+  {
+    "orcid": "0000-0002-2576-7828",
+    "scopus_id": 6602834227,
+    "first_name": "Samir",
+    "last_name": "Emam",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602834227"
+  },
+  {
+    "orcid": "0000-0002-2927-2689",
+    "scopus_id": 56811412800,
+    "first_name": "Bara",
+    "last_name": "Emran",
+    "department": "ELE",
+    "designation": "Assistant Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=56811412800"
+  },
+  {
+    "orcid": "0000-0001-7202-9943",
+    "scopus_id": 57202737761,
+    "first_name": "Anastassia",
+    "last_name": "Gharib",
+    "department": "CSE",
+    "designation": "Assistant Professor Computer Engineering",
+    "scopus_url": ""
+  },
+  {
+    "orcid": "0000-0002-8451-8805",
+    "scopus_id": 35885612700,
+    "first_name": "Mehdi",
+    "last_name": "Ghommem",
+    "department": "MCE",
+    "designation": "Associate Professor Mechanical Engineering | Associate Dean for Research",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=35885612700"
+  },
+  {
+    "orcid": "0000-0002-5453-9197",
+    "scopus_id": 57204035632,
+    "first_name": "Bayan",
+    "last_name": "Hamdan",
+    "department": "INE",
+    "designation": "Assistant Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57204035632"
+  },
+  {
+    "orcid": "0000-0003-0468-0309",
+    "scopus_id": 55778145035,
+    "first_name": "Mohammad",
+    "last_name": "Hamdan",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55778145035"
+  },
+  {
+    "orcid": "0000-0001-8751-0449",
+    "scopus_id": 8297024300,
+    "first_name": "Oualid",
+    "last_name": "Hammi",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=8297024300"
+  },
+  {
+    "orcid": "0000-0003-1797-7830",
+    "scopus_id": 55922065500,
+    "first_name": "Moncer",
+    "last_name": "Hariga",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55922065500"
+  },
+  {
+    "orcid": "0000-0001-5926-5861",
+    "scopus_id": 56911673900,
+    "first_name": "Mohamed",
+    "last_name": "Hassan",
+    "department": "CSE",
+    "designation": "Associate Professor Computer Science Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7401625771"
+  },
+  {
+    "orcid": "0000-0001-6318-0748",
+    "scopus_id": 7401625771,
+    "first_name": "Mohamed",
+    "last_name": "Hassan",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7401625771"
+  },
+  {
+    "orcid": "0000-0002-5262-0493",
+    "scopus_id": 56274170000,
+    "first_name": "Noha M",
+    "last_name": "Hassan",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=56274170000"
+  },
+  {
+    "orcid": "0000-0002-0184-6732",
+    "scopus_id": 6504731053,
+    "first_name": "Rami",
+    "last_name": "Hawileh",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering | Riad T. Sadik Chair",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6504731053"
+  },
+  {
+    "orcid": "0000-0002-7244-3105",
+    "scopus_id": 6602342812,
+    "first_name": "Ghaleb",
+    "last_name": "Husseini",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering | Associate Vice Chancellor for Research",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602342812"
+  },
+  {
+    "orcid": "0000-0001-5413-5355",
+    "scopus_id": 58241975900,
+    "first_name": "Mahmoud",
+    "last_name": "Ibrahim",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering | Interim Director for the Artificial Intelligence",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=58241975900"
+  },
+  {
+    "orcid": "0000-0002-4233-1962",
+    "scopus_id": 7005981380,
+    "first_name": "Taleb",
+    "last_name": "Ibrahim",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7005981380"
+  },
+  {
+    "orcid": "0000-0002-5655-0664",
+    "scopus_id": 55323020000,
+    "first_name": "Mohammad",
+    "last_name": "Jaradat",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=55323020000"
+  },
+  {
+    "orcid": "0000-0001-8479-9056",
+    "scopus_id": 14123423500,
+    "first_name": "Taha",
+    "last_name": "Landolsi",
+    "department": "CSE",
+    "designation": "Professor Computer Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=14123423500"
+  },
+  {
+    "orcid": "0000-0003-0260-0192",
+    "scopus_id": 6506162111,
+    "first_name": "Yassir",
+    "last_name": "Makkawi",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6506162111"
+  },
+  {
+    "orcid": "0000-0002-6863-3002",
+    "scopus_id": 6602344716,
+    "first_name": "Hasan",
+    "last_name": "Mir",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602344716"
+  },
+  {
+    "orcid": "0000-0001-5233-9725",
+    "scopus_id": 57211897813,
+    "first_name": "Aqeel",
+    "last_name": "Mohammed Taher",
+    "department": "CVE",
+    "designation": "Professor Of Practice Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=57211897813"
+  },
+  {
+    "orcid": "0000-0003-4974-2833",
+    "scopus_id": 6506329427,
+    "first_name": "Md.",
+    "last_name": "Mortula",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6506329427"
+  },
+  {
+    "orcid": "0000-0002-6188-8491",
+    "scopus_id": 6603360620,
+    "first_name": "Paul",
+    "last_name": "Nancarrow",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603360620"
+  },
+  {
+    "orcid": "0000-0003-4181-074X",
+    "scopus_id": 7006670047,
+    "first_name": "Malick",
+    "last_name": "Ndiaye",
+    "department": "INE",
+    "designation": "Professor Industrial Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7006670047"
+  },
+  {
+    "orcid": "0000-0002-6751-9101",
+    "scopus_id": 24921997400,
+    "first_name": "Mehmet",
+    "last_name": "Orhan",
+    "department": "MCE",
+    "designation": "Associate Professor Mechanical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=24921997400"
+  },
+  {
+    "orcid": "0000-0001-9302-8608",
+    "scopus_id": 7202452888,
+    "first_name": "Ahmed",
+    "last_name": "Osman-Ahmed",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering | HOD",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7202452888"
+  },
+  {
+    "orcid": "0000-0001-7068-3343",
+    "scopus_id": 7003359681,
+    "first_name": "Michel",
+    "last_name": "Pasquier",
+    "department": "CSE",
+    "designation": "Professor of Practice",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7003359681"
+  },
+  {
+    "orcid": "0000-0003-2253-994X",
+    "scopus_id": 7004607473,
+    "first_name": "Nasser",
+    "last_name": "Qaddoumi",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7004607473"
+  },
+  {
+    "orcid": "0000-0002-8251-654X",
+    "scopus_id": 35957039700,
+    "first_name": "Habib Ur",
+    "last_name": "Rehman",
+    "department": "ELE",
+    "designation": "Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=35957039700"
+  },
+  {
+    "orcid": "0000-0001-8509-2386",
+    "scopus_id": 58787224300,
+    "first_name": "Lotfi",
+    "last_name": "Romdhane",
+    "department": "MCE",
+    "designation": "Professor Mechanical Engineering | Associate Dean for Graduate Studies & Assistant to Provost",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=58787224300"
+  },
+  {
+    "orcid": "0000-0002-9163-4345",
+    "scopus_id": 36669172800,
+    "first_name": "Rana",
+    "last_name": "Sabouni",
+    "department": "CHBE",
+    "designation": "Associate Professor Chemical Engineering | Interim Director for the Advanced Biosciences and Bioengineering Research Center (ABSBERC)",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=36669172800"
+  },
+  {
+    "orcid": "0000-0001-7189-3940",
+    "scopus_id": 6603075555,
+    "first_name": "Assim",
+    "last_name": "Sagahyroon",
+    "department": "CSE",
+    "designation": "Professor Computer Engineering | Associate Dean for Undergraduate Studies",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603075555"
+  },
+  {
+    "orcid": "0000-0001-5134-0601",
+    "scopus_id": 26434445500,
+    "first_name": "Mostafa",
+    "last_name": "Shaaban",
+    "department": "ELE",
+    "designation": "Associate Professor Electrical Engineering | Director of the Energy",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=26434445500"
+  },
+  {
+    "orcid": "0000-0002-0214-7052",
+    "scopus_id": 56203724100,
+    "first_name": "Abdulrahim",
+    "last_name": "Shamayleh",
+    "department": "INE",
+    "designation": "Associate Professor Industrial Engineering | HOD & Coord.ESM MS-PhD Prog.",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=56203724100"
+  },
+  {
+    "orcid": "0000-0002-7651-3094",
+    "scopus_id": 16317066900,
+    "first_name": "Tamer",
+    "last_name": "Shanableh",
+    "department": "CSE",
+    "designation": "Professor Computer Science",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=16317066900"
+  },
+  {
+    "orcid": "0000-0001-5051-2504",
+    "scopus_id": 6603161043,
+    "first_name": "Zarook",
+    "last_name": "Shareefdeen",
+    "department": "CHBE",
+    "designation": "Professor Chemical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6603161043"
+  },
+  {
+    "orcid": "0000-0002-0231-9889",
+    "scopus_id": 7003887744,
+    "first_name": "Sami",
+    "last_name": "Tabsh",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=7003887744"
+  },
+  {
+    "orcid": "0000-0002-7975-132X",
+    "scopus_id": 15051771200,
+    "first_name": "Adil",
+    "last_name": "Tamimi",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=15051771200"
+  },
+  {
+    "orcid": "0000-0002-8244-2165",
+    "scopus_id": 56685261500,
+    "first_name": "Usman",
+    "last_name": "Tariq",
+    "department": "ELE",
+    "designation": "Associate Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=56685261500"
+  },
+  {
+    "orcid": "0000-0002-3118-5074",
+    "scopus_id": 6701518953,
+    "first_name": "Sherif",
+    "last_name": "Yehia",
+    "department": "CVE",
+    "designation": "Professor Civil Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6701518953"
+  },
+  {
+    "orcid": "0000-0002-6655-5418",
+    "scopus_id": 24802774400,
+    "first_name": "Amer",
+    "last_name": "Zakaria",
+    "department": "ELE",
+    "designation": "Associate Professor Electrical Engineering",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=24802774400"
+  },
+  {
+    "orcid": "0000-0002-1048-5633",
+    "scopus_id": 6602818774,
+    "first_name": "Imran",
+    "last_name": "Zualkernan",
+    "department": "CSE",
+    "designation": "Professor Computer Engineering | HOD",
+    "scopus_url": "https://www.scopus.com/authid/detail.uri?authorId=6602818774"
+  }
+]

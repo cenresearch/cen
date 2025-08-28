@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Collaborations</title>
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --blue:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+    header{
+      position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--border);
+      padding:8px 12px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    }
+    header .left{ justify-self:start; }
+    header .center{ justify-self:center; font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .wrap{ padding:12px; }
+    .card{ background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+
+    .actions{ display:flex; gap:8px; padding:12px; }
+    .btn{ font-size:12px; padding:6px 8px; border:1px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; }
+    .btn:hover{ border-color:#cbd5e1; }
+
+    .stats{ display:flex; gap:10px; padding:0 12px 12px; color:#374151; font-size:12px; flex-wrap:wrap; }
+    .stat{ padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+
+    .stackbar-wrap{ padding:12px; }
+    .stackbar{
+      display:flex; height:28px; border:1px solid #cbd5e1; border-radius:999px; overflow:hidden;
+    }
+    .seg{
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#fff; white-space:nowrap;
+    }
+    .seg-aus{ background:#740E4C; }
+    .seg-local{ background:#10b981; }
+    .seg-intl{ background:#ef4444; }
+
+    table{ width:100%; border-collapse:collapse; font-size:13px; }
+    th, td{ padding:10px 12px; border-top:1px solid #cbd5e1; vertical-align:top; }
+    th{ text-align:left; color:#374151; background:#fafafa; position:sticky; top:0; z-index:1; }
+    .num{ text-align:center; }
+    .muted{ color:var(--muted); }
+
+    .badge{ display:inline-block; padding:2px 8px; border-radius:999px; font-weight:700; font-size:11px; }
+    .b-aus{ background:#F3E8F0; color:#740E4C; }
+    .b-local{ background:#E9FAF4; color:#047857; }
+    .b-intl{ background:#FEE2E2; color:#B91C1C; }
+    .b-unk{ background:#F3F4F6; color:#374151; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="left"><a href="javascript:history.back()">← Back</a></div>
+    <div id="title" class="center"></div>
+    <div></div>
+  </header>
+
+  <div class="wrap">
+    <div class="card" id="tblCard">
+      <!-- top stacked bar -->
+      <div class="stackbar-wrap">
+        <div id="mixbar" class="stackbar" aria-label="publication mix"></div>
+      </div>
+
+      <!-- keep only Download CSV -->
+      <div class="actions">
+        <button class="btn" id="downloadCsvBtn">Download CSV</button>
+      </div>
+
+      <!-- chips with counts -->
+      <div class="stats" id="stats"></div>
+
+      <!-- full-width table, no inner scrolling -->
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="width:110px;">Pub Scopus ID</th>
+            <th>Title</th>
+            <th class="num" style="width:90px;">AUS</th>
+            <th class="num" style="width:90px;">Local</th>
+            <th class="num" style="width:120px;">International</th>
+            <th style="width:150px;">Classification</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <p class="muted" style="padding:12px;">Counts are number of authors on each paper. Classification uses International > Local > AUS.</p>
+    </div>
+  </div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const aid = qs.get('aid');
+    const rawName = decodeURIComponent(qs.get('name') || '');
+
+    function baseNameOnly(s){
+      let out = s || '';
+      while (/\s*\([^)]*\)\s*$/.test(out)) out = out.replace(/\s*\([^)]*\)\s*$/,'');
+      return out.trim();
+    }
+    function badge(type){
+      const t = String(type || 'Unknown').trim();
+      if (t === 'AUS') return '<span class="badge b-aus">AUS</span>';
+      if (t === 'Local') return '<span class="badge b-local">Local</span>';
+      if (t === 'International') return '<span class="badge b-intl">International</span>';
+      return '<span class="badge b-unk">Unknown</span>';
+    }
+    function esc(s){
+      return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    const authorNameFull = baseNameOnly(rawName);
+    document.getElementById('title').textContent = `${authorNameFull}  Collaborations`;
+
+    (async function init(){
+      const ts = Date.now();
+      const r = await fetch(`./author_coauthorship.json?v=${ts}`);
+      const data = await r.json();
+      const rec = data.find(x => String(x.author_id) === String(aid));
+      if(!rec){ renderEmpty(); return; }
+
+      const pubs = (rec.publications || []).map(p => ({
+        scopus_id: String(p.scopus_id || ''),
+        title: p.title || '',
+        aus_authors: numOrNull(p.aus_authors),
+        local_authors: numOrNull(p.local_authors),
+        international_authors: numOrNull(p.international_authors),
+        collab_type: String(p.collab_type || 'Unknown').trim()
+      }));
+
+      const counts = ensureTotals(rec, pubs);
+      renderBar(counts);
+      renderStats(counts);
+      renderTable(pubs);
+
+      document.getElementById('downloadCsvBtn').addEventListener('click', () => downloadCsv(authorNameFull, pubs));
+    })();
+
+    function numOrNull(v){
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function ensureTotals(rec, pubs){
+      let aus = Number.isFinite(rec.aus_pubs) ? rec.aus_pubs : pubs.filter(p => p.collab_type==='AUS').length;
+      let local = Number.isFinite(rec.local_pubs) ? rec.local_pubs : pubs.filter(p => p.collab_type==='Local').length;
+      let intl = Number.isFinite(rec.intl_pubs) ? rec.intl_pubs : pubs.filter(p => p.collab_type==='International').length;
+      let totalPubs = Number.isFinite(rec.total_pubs) ? rec.total_pubs : pubs.length;
+      return {aus, local, intl, totalPubs};
+    }
+
+    function renderEmpty(){
+      document.querySelector('#tbl tbody').innerHTML =
+        '<tr><td colspan="6" style="padding:12px;" class="muted">No publications for this author.</td></tr>';
+      renderBar({aus:0, local:0, intl:0, totalPubs:0});
+      renderStats({aus:0, local:0, intl:0, totalPubs:0});
+    }
+
+    function renderBar({aus, local, intl, totalPubs}){
+      const el = document.getElementById('mixbar');
+      el.innerHTML = '';
+      if (!totalPubs) {
+        el.style.background = '#f3f4f6';
+        el.style.minHeight = '28px';
+        return;
+      }
+      const pct = v => Math.round(100 * v / totalPubs);
+      const segs = [
+        {cls:'seg-aus',   w:pct(aus),   label:`AUS ${pct(aus)}%`},
+        {cls:'seg-local', w:pct(local), label:`Local ${pct(local)}%`},
+        {cls:'seg-intl',  w:pct(intl),  label:`International ${pct(intl)}%`}
+      ].filter(s => s.w > 0);
+
+      segs.forEach(s => {
+        const d = document.createElement('div');
+        d.className = `seg ${s.cls}`;
+        d.style.width = `${s.w}%`;
+        d.textContent = s.label;
+        el.appendChild(d);
+      });
+    }
+
+    function renderStats({aus, local, intl, totalPubs}){
+      const s = document.getElementById('stats');
+      const pct = n => totalPubs ? Math.round(100*n/totalPubs) + '%' : '0%';
+      s.innerHTML = `
+        <div class="stat"><b>${totalPubs}</b> total</div>
+        <div class="stat"><b>${aus}</b> AUS • ${pct(aus)}</div>
+        <div class="stat"><b>${local}</b> Local • ${pct(local)}</div>
+        <div class="stat"><b>${intl}</b> International • ${pct(intl)}</div>
+      `;
+    }
+
+    function renderTable(pubs){
+      const tb = document.querySelector('#tbl tbody');
+      tb.innerHTML = '';
+      pubs
+        .sort((a,b)=> a.title.localeCompare(b.title) || a.scopus_id.localeCompare(b.scopus_id))
+        .forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><a href="https://www.scopus.com/record/display.uri?eid=2-s2.0-${p.scopus_id}" target="_blank" rel="noopener">${p.scopus_id}</a></td>
+            <td>${esc(p.title)}</td>
+            <td class="num">${p.aus_authors ?? '<span class="muted">—</span>'}</td>
+            <td class="num">${p.local_authors ?? '<span class="muted">—</span>'}</td>
+            <td class="num">${p.international_authors ?? '<span class="muted">—</span>'}</td>
+            <td>${badge(p.collab_type)}</td>
+          `;
+          tb.appendChild(tr);
+        });
+    }
+
+    function downloadCsv(authorName, pubs){
+      const rows = [
+        ['scopus_id','title','aus_authors','local_authors','international_authors','collab_type'],
+        ...pubs.map(p => [
+          p.scopus_id,
+          p.title.replace(/\n/g,' ').replace(/"/g,'""'),
+          p.aus_authors ?? '',
+          p.local_authors ?? '',
+          p.international_authors ?? '',
+          p.collab_type
+        ])
+      ];
+      const csv = rows.map(r => r.map(v =>
+        /[",\n]/.test(String(v)) ? `"${String(v)}"` : String(v)
+      ).join(',')).join('\n');
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+      a.download = `${authorName.replace(/\s+/g,'_')}_authorships.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  </script>
+</body>
+</html>

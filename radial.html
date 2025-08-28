@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>AUS Clusters — Radial</title>
+<style>
+  :root {
+    --border: #e5e7eb;
+    --fg: #111;
+    --bg: #fff;
+  }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  .topnav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 16px;
+  }
+  .topnav a {
+    text-decoration: none;
+    color: #111;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .topnav a:hover {
+    color: #007acc;
+  }
+  
+	.topnav a.active {
+	  background-color: #111;
+	  color: white;
+	  font-weight: bold;
+	  padding: 4px 10px;
+	  border-radius: 8px;
+	}
+
+  .spacer {
+    flex: 1;
+  }
+	.btn {
+	  font-size: 13px;
+	  padding: 6px 12px;
+	  border: none;
+	  border-radius: 6px;
+	  background: #007acc;   /* blue background */
+	  color: white;          /* white text */
+	  cursor: pointer;
+	  transition: background 0.2s ease;
+	}
+	.btn:hover {
+	  background: #005fa3;   /* darker blue on hover */
+	}
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #fafafa;
+  }
+  svg {
+    display: block;
+    width: 100vw;
+    height: calc(100vh - 96px); /* Reserve space for nav + controls */
+  }
+</style>
+
+<!-- Top navigation bar -->
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters.html">Clusters</a>
+	<a href="radial.html">Radial Clusters</a>
+    <a href="themes.html">Themes</a>
+    <a href="classification.html">Classification</a>
+    <a href="authors.html">Authors</a>
+	<a href="authors_clusters.html">Authors-Clusters</a>
+	<a href="cen_collab.html">Collaborations</a>
+	<a href="metrics.html">Metrics</a>
+	<a href="process.html">Process Diagram</a>
+	
+  </div>
+
+<script>
+  const current = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
+
+  document.querySelectorAll('.topnav a').forEach(link => {
+    const href = link.getAttribute('href').split('?')[0];
+    const target = href.split('/').pop() || 'index.html';
+
+    if (target === current) {
+      link.classList.add('active');
+    }
+  });
+</script>
+
+
+
+<!-- Controls bar with slider + download button -->
+<div class="controls">
+  <label>Min Papers:
+    <input id="minPapers" type="range" min="1" max="10" value="1" />
+    <span id="minPapersVal">1</span>
+  </label>
+  <button id="savePngBtn" class="btn">Download PNG</button>
+</div>
+
+<!-- SVG radial chart -->
+<svg id="viz"></svg>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+(async function () {
+  const raw = await fetch("clusters.json?v=" + Date.now()).then(r => r.json());
+
+  const svg = d3.select("#viz");
+  const minSlider = document.getElementById("minPapers");
+  const minLabel = document.getElementById("minPapersVal");
+
+  const baseThemes = [];
+  let globalMax = 1;
+  const clusterIds = new Set();
+
+  const stripTheme = s => (s || "").replace(/^Theme\s*\d+:\s*/, "").trim();
+
+  for (const cluster of raw.children) {
+    const clusterId = +cluster.id;
+    clusterIds.add(clusterId);
+
+    for (const theme of cluster.children || []) {
+      const themeId = +theme.id;
+      const authors = (theme.children || []).map(a => {
+        const v = a.dominant_papers ?? (a.theme_publications?.length || 0);
+        globalMax = Math.max(globalMax, v);
+        return {
+          name: a.name,
+          value: v,
+          cluster_id: clusterId,
+          theme_id: themeId,
+          type: "author"
+        };
+      });
+      baseThemes.push({
+        name: stripTheme(theme.name),
+        cluster_id: clusterId,
+        theme_id: themeId,
+        authors,
+        type: "theme"
+      });
+    }
+  }
+
+  minSlider.max = globalMax;
+
+  const color = d3.scaleOrdinal()
+    .domain([...clusterIds])
+    .range(d3.schemeTableau10);
+
+  function render(threshold) {
+    svg.selectAll("*").remove();
+
+    const rootData = {
+      name: "root",
+      children: baseThemes
+        .map(theme => {
+          const authors = theme.authors.filter(a => a.value >= threshold);
+          return authors.length
+            ? {
+                name: theme.name,
+                children: authors,
+                cluster_id: theme.cluster_id,
+                theme_id: theme.theme_id,
+                type: "theme"
+              }
+            : null;
+        })
+        .filter(Boolean)
+    };
+
+    const radius = 500;
+    const tree = d3.cluster().size([2 * Math.PI, radius]);
+    const root = tree(d3.hierarchy(rootData));
+
+    const g = svg.append("g");
+
+    g.selectAll("path")
+      .data(root.links())
+      .join("path")
+      .attr("fill", "none")
+      .attr("stroke", d => {
+        const cid = d.target.data.cluster_id ?? d.source.data.cluster_id;
+        return cid != null ? color(cid) : "#ccc";
+      })
+      .attr("stroke-width", 1.1)
+      .attr("stroke-opacity", 0.6)
+      .attr("d", d3.linkRadial().angle(d => d.x).radius(d => d.y));
+
+    g.selectAll("circle")
+      .data(root.descendants())
+      .join("circle")
+      .attr("transform", d => `rotate(${(d.x * 180 / Math.PI) - 90}) translate(${d.y},0)`)
+      .attr("r", d => {
+        if (d.data.type === "theme") return 4;
+        if (d.data.type === "author") return Math.max(2, Math.sqrt(d.data.value || 1) + 1.2);
+        return 3;
+      })
+      .attr("fill", d => {
+        const cid = d.data.cluster_id;
+        return cid != null ? color(cid) : "#999";
+      });
+
+    g.selectAll("text")
+      .data(root.descendants())
+      .join("text")
+      .attr("transform", d => {
+        const angle = (d.x * 180 / Math.PI) - 90;
+        return `rotate(${angle}) translate(${d.y},0) rotate(${d.x >= Math.PI ? 180 : 0})`;
+      })
+      .attr("dy", "0.31em")
+      .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+      .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+      .attr("stroke", "#fff")
+      .attr("stroke-width", 2)
+      .style("paint-order", "stroke")
+      .style("font-size", d => d.data.type === "theme" ? "11px" : (d.data.type === "author" ? "14px" : "10px"))
+      .style("font-weight", d => d.data.type === "theme" ? 700 : 400)
+      .attr("fill", d => {
+        const cid = d.data.cluster_id;
+        return cid != null ? color(cid) : "#333";
+      })
+      .text(d => {
+        if (d.data.type === "theme") return d.data.name;
+        if (d.data.type === "author") return `${d.data.name} (${d.data.value})`;
+        return "";
+      });
+
+    const bbox = g.node().getBBox();
+    const margin = 30;
+    const vb = [
+      bbox.x - margin,
+      bbox.y - margin,
+      bbox.width + 2 * margin,
+      bbox.height + 2 * margin
+    ];
+    svg.attr("viewBox", vb.join(" "));
+  }
+
+  minSlider.addEventListener("input", () => {
+    const val = +minSlider.value;
+    minLabel.textContent = val;
+    render(val);
+  });
+
+  render(+minSlider.value);
+
+  document.getElementById("savePngBtn").addEventListener("click", () => {
+    const svgEl = document.getElementById("viz");
+    const serializer = new XMLSerializer();
+    const src = serializer.serializeToString(svgEl);
+
+    const vb = svgEl.viewBox.baseVal;
+    const canvas = document.createElement("canvas");
+    canvas.width = vb.width * 2;
+    canvas.height = vb.height * 2;
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.onload = function () {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const a = document.createElement("a");
+      a.download = "radial.png";
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    };
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(src);
+  });
+})();
+</script>

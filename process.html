@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>AUS Engineering Classification Pipeline</title>
+<style>
+  :root{
+    --bg:#0b0f17; --panel:#0f1420; --fg:#e8eef7; --muted:#a6b0bf;
+    --cyan:#06b6d4; --amber:#f59e0b; --green:#22c55e; --edge:#344154;
+    --blue:#60a5fa; --violet:#8b5cf6; --pink:#ec4899;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+
+  header{
+    position:sticky;top:0;z-index:10;
+    background:rgba(11,15,23,.9);backdrop-filter:blur(6px);
+    border-bottom:1px solid #1f2937;
+    padding:2px 6px; gap:6px; min-height:30px;
+    display:flex;align-items:center;flex-wrap:nowrap
+  }
+  .topnav{display:flex;gap:4px;align-items:center;flex:1 1 auto;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+  .topnav::-webkit-scrollbar{display:none}
+  .topnav a{display:inline-block;padding:2px 6px;border-radius:9999px;font-size:10px;font-weight:800;text-decoration:none;line-height:1;border:1px solid #1f2937;transition:.15s transform ease,.15s filter ease}
+  .topnav a:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .topnav a.active{box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+  .topnav a[data-color="cyan"]{background:var(--cyan);color:#06121a}
+  .topnav a[data-color="blue"]{background:var(--blue);color:#07111f}
+  .topnav a[data-color="amber"]{background:var(--amber);color:#140a03}
+  .topnav a[data-color="green"]{background:var(--green);color:#03140a}
+  .topnav a[data-color="violet"]{background:var(--violet);color:#0f0a17}
+  .topnav a[data-color="pink"]{background:var(--pink);color:#17070f}
+
+  .controls{display:flex;gap:6px}
+  button{border:1px solid #1f2937;background:#111827;color:#cbd5e1;padding:4px 8px;border-radius:10px;cursor:pointer;font-size:11px}
+  #downloadPng{background:var(--violet);color:#0f0a17;border:0;padding:6px 12px;font-size:12px;font-weight:800;border-radius:9999px;box-shadow:0 1px 0 rgba(255,255,255,.06) inset, 0 6px 14px rgba(139,92,246,.25)}
+  #downloadPng:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+  .canvas{width:100%;overflow:auto}
+  svg{width:100%}
+
+  .node text{font-size:24px;fill:var(--fg);dominant-baseline:middle;text-anchor:middle;font-weight:600}
+  .card{fill:var(--panel);stroke-width:2px;rx:16;ry:16;filter:url(#drop)}
+  .src .card{stroke:var(--cyan)}
+  .hub .card{stroke:var(--blue)}
+  .ent .card{stroke:var(--amber)}
+  .step .card{stroke:var(--green)}
+
+  .link{fill:none;stroke:var(--edge);stroke-width:2px;marker-end:url(#arrow);opacity:.95}
+  .link.src2db{stroke:var(--cyan)}
+  .link.db2ent{stroke:var(--amber)}
+  .link.ent2llm{stroke:var(--green)}
+  .link.llmstep{stroke:var(--green)}
+
+  .col-label{font-size:42px;font-weight:800;letter-spacing:.3px;paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:4;text-anchor:middle;dominant-baseline:central}
+  .label-sources{fill:var(--cyan)} .label-database{fill:var(--blue)} .label-entities{fill:var(--amber)} .label-llm{fill:var(--green)}
+
+  .input-group{fill:transparent;stroke:var(--green);stroke-width:2px;stroke-dasharray:10 8;rx:18;ry:18}
+
+  /* dotted wrapper for supplemental sources */
+  .supp-group{fill:transparent;stroke:rgba(6,182,212,.85);stroke-width:2.5px;stroke-dasharray:10 8;rx:18;ry:18}
+  .supp-label{font-size:22px;font-weight:800;fill:var(--cyan)}
+</style>
+<body>
+<header>
+  <nav class="topnav" role="navigation" aria-label="Primary">
+    <a href="./" data-color="cyan">Home</a>
+    <a href="clusters.html" data-color="blue">Clusters</a>
+    <a href="radial.html" data-color="violet">Radial Clusters</a>
+    <a href="themes.html" data-color="amber">Themes</a>
+    <a href="classification.html" data-color="green">Classification</a>
+    <a href="authors.html" data-color="blue">Authors</a>
+    <a href="authors_clusters.html" data-color="violet">Authors-Clusters</a>
+    <a href="process.html" data-color="pink" class="active">Process Diagram</a>
+  </nav>
+  <div class="controls"><button id="downloadPng">Download PNG</button></div>
+</header>
+
+<div class="canvas">
+  <svg id="svg" viewBox="0 0 2800 3000" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script>
+/* canvas height */
+const headerEl = document.querySelector('header');
+const canvasEl = document.querySelector('.canvas');
+new ResizeObserver(() => {
+  const h = headerEl.offsetHeight || 30;
+  canvasEl.style.height = `calc(100vh - ${h}px)`;
+}).observe(headerEl);
+
+/* nav active */
+(function setActiveNav(){
+  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  document.querySelectorAll('.topnav a').forEach(a=>{
+    const href = a.getAttribute('href').toLowerCase();
+    if ((href === './' && (path === '' || path === 'index.html')) || href === path) a.classList.add('active');
+  });
+})();
+
+/* positions */
+const COL = { sources:240, db:920, ents:1550, llm:2300 };
+const headerY = 80;
+const topPadSources = headerY + 120;
+
+/* content */
+const scopusLabel = "Scopus indexed\nPublications ONLY";   // two-line Scopus text
+const supplementalSources = ["OpenAlex","Crossref","Unpaywall","Screen scrapers","CSV files"];
+const entities = ["Publications","Authors","Journals","Affiliations","Topics","Metrics"];
+const llmSteps = [
+  "Publications for AUS Eng. authors\n1/1/2022 --> current",
+  "Title + Abstract + Keywords",
+  "Catalog\nClusters + Themes + Descriptions",
+  "LLM: OpenAI gpt-4o-mini",
+  "Assign one cluster + one theme",
+  "If unassigned → run 3 attempts\npick highest confidence",
+  "If still unassigned → \ncreate new themes",
+  "Assigned themes ready"
+];
+
+/* spacing */
+const srcGap = 96, entGap = 96;
+const SUPP_EXTRA_GAP = 140;
+
+/* size helpers */
+function size(d){
+  const lines = String(d.label).split("\n");
+  const baseW = (d.big||d.cls==="step") ? 440 : 280;
+  const w = Math.max(baseW, Math.min(600, Math.max(...lines.map(s=>s.length))*8 + 40));
+  const lineH = 24;
+  const hBase = (d.big||d.cls==="step"||d.isScopus) ? 110 : 58; // make Scopus taller
+  const h = Math.max(hBase, lines.length*lineH + 34);
+  return {w,h,lineH};
+}
+function rect(d){ const {w,h}=size(d); return {x:d.x-w/2, y:d.y-h/2, w, h}; }
+
+/* nodes */
+const nodes = [];
+nodes.push({ id:"src0", label: scopusLabel, x:COL.sources, y:topPadSources, cls:"src", isScopus:true });
+supplementalSources.forEach((label,i)=>{
+  nodes.push({ id:`src${i+1}`, label, x:COL.sources, y:topPadSources + SUPP_EXTRA_GAP + (i+1)*srcGap, cls:"src", supplemental:true });
+});
+
+/* Database centered against all sources */
+const allSrcRects = nodes.filter(n=>n.cls==="src").map(rect);
+const srcMinY = Math.min(...allSrcRects.map(r=>r.y));
+const srcMaxY = Math.max(...allSrcRects.map(r=>r.y + r.h));
+const dbY = (srcMinY + srcMaxY)/2;
+nodes.push({ id:"db", label:"Database", x:COL.db, y:dbY, cls:"hub", big:true });
+
+/* Entities and steps */
+entities.forEach((label,i)=> nodes.push({ id:`ent${i}`, label, x:COL.ents, y: dbY - ((entities.length-1)/2)*entGap + i*entGap, cls:"ent" }));
+const stepGap = 188, fusedGap = 76;
+let y = dbY;
+llmSteps.forEach((label,i)=>{ nodes.push({ id:`step${i}`, label, x:COL.llm, y, cls:"step" }); y += (i===1?fusedGap:stepGap); });
+
+/* helpers */
+const byId = id => nodes.find(n=>n.id===id);
+function anchor(id, side){
+  const n = byId(id), r = rect(n), cx=r.x+r.w/2, cy=r.y+r.h/2;
+  if(side==="left") return {x:r.x, y:cy};
+  if(side==="right")return {x:r.x+r.w, y:cy};
+  if(side==="top")  return {x:cx, y:r.y};
+  return {x:cx, y:r.y+r.h};
+}
+function smooth(a,b){ const dx=b.x-a.x, dy=b.y-a.y, k=.55; return `M ${a.x} ${a.y} C ${a.x+dx*k} ${a.y}, ${b.x-dx*k} ${b.y-dy*k}, ${b.x} ${b.y}`; }
+
+/* edges */
+const edges=[];
+for (let i=0;i<=supplementalSources.length;i++) edges.push({from:`src${i}`,to:"db",kind:"src2db"});
+entities.forEach((_,i)=>edges.push({from:"db",to:`ent${i}`,kind:"db2ent"}));
+entities.forEach((_,i)=>edges.push({from:`ent${i}`,to:`step0`,kind:"ent2llm"}));
+for(let i=1;i<llmSteps.length;i++) edges.push({from:`step${i-1}`,to:`step${i}`,kind:"llmstep"});
+
+/* svg */
+const svg=d3.select("#svg"); const g=svg.append("g");
+const defs=svg.append("defs");
+defs.append("filter").attr("id","drop").append("feDropShadow")
+  .attr("dx","0").attr("dy","2").attr("stdDeviation","3").attr("flood-color","#000").attr("flood-opacity",".35");
+defs.append("marker").attr("id","arrow").attr("viewBox","0 0 12 12").attr("refX",12).attr("refY",6).attr("markerWidth",11).attr("markerHeight",11).attr("orient","auto-start-reverse")
+  .append("path").attr("d","M 0 0 L 12 6 L 0 12 z").attr("fill","#94a3b8");
+
+/* links */
+g.append("g").selectAll("path.link").data(edges).enter().append("path")
+  .attr("class", d=>`link ${d.kind}`)
+  .attr("d", d=>{
+    const A = anchor(d.from, ["src2db","db2ent","ent2llm"].includes(d.kind)?"right":"bottom");
+    const B = anchor(d.to,   ["src2db","db2ent","ent2llm"].includes(d.kind)?"left":"top");
+    return smooth(A,B);
+  });
+
+/* nodes */
+const nodeG=g.append("g").selectAll("g.node").data(nodes).enter().append("g")
+  .attr("class", d=>`node ${d.cls}${d.supplemental?' supplemental':''}`)
+  .attr("transform", d=>`translate(${rect(d).x},${rect(d).y})`);
+nodeG.append("rect").attr("class","card").attr("width", d=>rect(d).w).attr("height", d=>rect(d).h);
+
+const lineH=24;
+nodeG.each(function(d){
+  const r=rect(d), lines=String(d.label).split("\n"), baseY=r.h/2-((lines.length-1)*lineH)/2;
+  const t=d3.select(this).append("text").attr("x", r.w/2).attr("y", baseY).attr("text-anchor","middle").attr("dominant-baseline","middle");
+  t.selectAll("tspan").data(lines).enter().append("tspan").attr("x", r.w/2).attr("dy",(l,i)=>i===0?0:lineH).text(l=>l);
+});
+
+/* supplemental dotted wrapper with two-line, centered label and extra gap */
+(function drawSupplementalBox(){
+  const boxes = nodes.filter(n=>n.supplemental).map(rect);
+  if (!boxes.length) return;
+  const pad = 24;
+  const x1 = Math.min(...boxes.map(r=>r.x)) - pad;
+  const y1 = Math.min(...boxes.map(r=>r.y)) - pad;
+  const x2 = Math.max(...boxes.map(r=>r.x + r.w)) + pad;
+  const y2 = Math.max(...boxes.map(r=>r.y + r.h)) + pad;
+
+  // dotted rectangle
+  g.insert("rect",":first-child")
+    .attr("class","supp-group")
+    .attr("x", x1).attr("y", y1).attr("width", x2-x1).attr("height", y2-y1);
+
+  // centered, two-line label with extra spacing above the box
+  const centerX = x1 + (x2 - x1)/2;
+  const topLabelY = y1 - 36; // extra gap between label and dotted box
+
+  const lbl = g.append("text")
+    .attr("class","supp-label")
+    .attr("x", centerX)
+    .attr("y", topLabelY)
+    .attr("text-anchor","middle");
+
+  lbl.append("tspan")
+    .attr("x", centerX)
+    .text("Supplemental data to");
+  lbl.append("tspan")
+    .attr("x", centerX)
+    .attr("dy", 20)
+    .text("Scopus publications");
+})();
+
+/* headers */
+svg.append("text").attr("class","col-label label-sources").attr("x", COL.sources).attr("y", headerY).text("Sources (APIs)");
+svg.append("text").attr("class","col-label label-database").attr("x", COL.db).attr("y", headerY).text("Database");
+svg.append("text").attr("class","col-label label-entities").attr("x", COL.ents).attr("y", headerY).text("Entities");
+svg.append("text").attr("class","col-label label-llm").attr("x", COL.llm).attr("y", headerY).text("LLM");
+
+/* fit viewBox */
+(function fit(){ const bbox=g.node().getBBox(); svg.attr("viewBox",[0,0, 2800, bbox.y+bbox.height+160].join(" ")); })();
+
+/* PNG download */
+document.getElementById("downloadPng").onclick = async () => {
+  const svgEl = document.getElementById("svg");
+  const vb = svgEl.viewBox.baseVal;
+  const width  = vb && vb.width  ? vb.width  : svgEl.getBoundingClientRect().width;
+  const height = vb && vb.height ? vb.height : svgEl.getBoundingClientRect().height;
+
+  const clone = svgEl.cloneNode(true);
+  const styleText = Array.from(document.querySelectorAll("style")).map(s=>s.textContent).join("\n");
+  const styleEl = document.createElementNS("http://www.w3.org/2000/svg","style");
+  styleEl.textContent = styleText;
+  clone.insertBefore(styleEl, clone.firstChild);
+  clone.setAttribute("xmlns","http://www.w3.org/2000/svg");
+  clone.setAttribute("width", width);
+  clone.setAttribute("height", height);
+
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#0b0f17";
+  const bgRect = document.createElementNS("http://www.w3.org/2000/svg","rect");
+  bgRect.setAttribute("x","0"); bgRect.setAttribute("y","0"); bgRect.setAttribute("width","100%"); bgRect.setAttribute("height","100%"); bgRect.setAttribute("fill", bg);
+  clone.insertBefore(bgRect, clone.firstChild);
+
+  const xml = new XMLSerializer().serializeToString(clone);
+  const url = URL.createObjectURL(new Blob([xml], {type:"image/svg+xml;charset=utf-8"}));
+  const img = new Image();
+  const scale = Math.max(1, Math.min(4, window.devicePixelRatio || 2));
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width  = Math.floor(width  * scale);
+    canvas.height = Math.floor(height * scale);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = bg; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.setTransform(scale,0,0,scale,0,0);
+    ctx.drawImage(img, 0, 0);
+    URL.revokeObjectURL(url);
+    canvas.toBlob(blob => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "aus_eng_classification_pipeline.png";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    }, "image/png");
+  };
+  img.onerror = () => URL.revokeObjectURL(url);
+  img.src = url;
+};
+</script>
+</body>
+</html>

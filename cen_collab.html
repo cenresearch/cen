@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CEN Collaborations</title>
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --blue:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+
+    /* top nav */
+    .topnav { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); display: flex; gap: 16px; padding: 10px 16px; z-index: 2000; }
+    .topnav a { text-decoration: none; color: #111; font-size: 14px; font-weight: 500; }
+    .topnav a:hover { color: #007acc; }
+    .topnav a.active { background-color: #111; color: white; font-weight: bold; padding: 4px 10px; border-radius: 8px; }
+
+    .wrap{ padding:12px; }
+    .card{ background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+
+    /* centered blue header above bar */
+    .section-title{
+      margin:12px;
+      font-size:20px;
+      font-weight:800;
+      text-align:center;
+      color:var(--blue);
+    }
+
+    .stackbar-wrap{ padding:12px; }
+    .stackbar{
+      display:flex; height:28px; border:1px solid #cbd5e1; border-radius:999px; overflow:hidden;
+    }
+    .seg{ display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px; color:#fff; white-space:nowrap; }
+    .seg-aus{ background:#740E4C; }
+    .seg-local{ background:#10b981; }
+    .seg-intl{ background:#ef4444; }
+
+    .stats{ display:flex; gap:10px; padding:0 12px 12px; color:#374151; font-size:12px; flex-wrap:wrap; }
+    .stat{ padding:6px 8px; border:1px solid var(--border); border-radius:8px; }
+
+    .actions{ display:flex; gap:8px; padding:12px; }
+    .btn{ font-size:12px; padding:6px 8px; border:1px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; }
+    .btn:hover{ border-color:#cbd5e1; }
+
+    /* bigger table text + sortable icons */
+    table{ width:100%; border-collapse:collapse; font-size:15px; }
+    th, td{ padding:10px 12px; border-top:1px solid #cbd5e1; vertical-align:top; }
+    th{ position:sticky; top:0; z-index:1; text-align:left; color:#374151; background:#fafafa; cursor:pointer; user-select:none; }
+    th.sortable{ padding-right:28px; }
+    .sort-arrows{
+      position:absolute; right:8px; top:50%; transform:translateY(-50%);
+      display:inline-flex; flex-direction:column; line-height:10px; font-size:11px; color:#94a3b8;
+    }
+    .sort-arrows .up, .sort-arrows .down{ height:10px; display:block; opacity:.6; }
+    th.sorted-asc .sort-arrows .up{ color:#111; opacity:1; }
+    th.sorted-desc .sort-arrows .down{ color:#111; opacity:1; }
+
+    .num{ text-align:center; }
+    .muted{ color:var(--muted); }
+
+    /* compact author column */
+    th.author-col, td.author { width:140px; max-width:140px; }
+    td.author { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .author a{ color:#2563eb; text-decoration:none; display:inline-block; max-width:100%; }
+    .author a:hover{ text-decoration:underline; }
+
+    .tiny{ font-size:11px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <!-- Top nav -->
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters.html">Clusters</a>
+    <a href="radial.html">Radial Clusters</a>
+    <a href="themes.html">Themes</a>
+    <a href="classification.html">Classification</a>
+    <a href="authors.html">Authors</a>
+    <a href="authors_clusters.html">Authors-Clusters</a>
+    <a href="cen_collab.html">Collaborations</a>
+	<a href="metrics.html">Metrics</a>
+    <a href="process.html">Process Diagram</a>
+  </div>
+
+  <script>
+    // highlight current nav item
+    (function () {
+      const current = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+      document.querySelectorAll('.topnav a').forEach(a => {
+        const href = (a.getAttribute('href') || '').split('?')[0];
+        const target = (href.split('/').pop() || 'index.html');
+        if (target === current || (href === './' && (current === '' || current === 'index.html'))) {
+          a.classList.add('active');
+        }
+      });
+    })();
+  </script>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="section-title">CEN Collaborations</div>
+
+      <!-- top stacked bar -->
+      <div class="stackbar-wrap">
+        <div id="mixbar" class="stackbar" aria-label="overall publication mix"></div>
+        <div id="mixmeta" class="tiny" style="padding:6px 2px 0 2px;"></div>
+      </div>
+
+      <!-- chips -->
+      <div id="stats" class="stats"></div>
+
+      <!-- actions -->
+      <div class="actions">
+        <button class="btn" id="downloadCsvBtn">Download CSV</button>
+      </div>
+
+      <!-- table -->
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th class="sortable author-col" data-key="name">
+              Author
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+            <th class="sortable" data-key="department" style="width:120px;">
+              Dept
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+            <th class="sortable num" data-key="total_pubs" style="width:90px;">
+              Total
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+            <th class="sortable num" data-key="aus_pubs" style="width:90px;">
+              AUS
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+            <th class="sortable num" data-key="local_pubs" style="width:90px;">
+              Local
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+            <th class="sortable num" data-key="intl_pubs" style="width:120px;">
+              International
+              <span class="sort-arrows"><span class="up">▲</span><span class="down">▼</span></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <p class="muted" style="padding:12px;">
+        Percentages in the bar are computed over unique publications across all authors. Table counts are per author.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const ORDER = ['International','Local','AUS','Unknown'];
+    let rows = [];
+    let sortKey = 'total_pubs';
+    let sortDir = 'desc';
+
+    (async function init(){
+      const ts = Date.now();
+      const r = await fetch(`./author_coauthorship.json?v=${ts}`);
+      const data = await r.json();
+
+      rows = data.map(d => ({
+        author_id: d.author_id,
+        name: d.author_name || '',
+        department: d.department || '',
+        total_pubs: toInt(d.total_pubs),
+        aus_pubs: toInt(d.aus_pubs),
+        local_pubs: toInt(d.local_pubs),
+        intl_pubs: toInt(d.intl_pubs),
+      }));
+
+      const { totals, uniqueCount } = overallUniqueMix(data);
+      renderBar(totals, uniqueCount);
+      renderChips(totals, uniqueCount);
+
+      attachSortHandlers();
+      updateHeaderIcons(); // set initial icon state
+      renderTable();
+      document.getElementById('downloadCsvBtn').addEventListener('click', downloadCsv);
+    })();
+
+    function toInt(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+
+    function overallUniqueMix(data){
+      const byId = new Map();
+      for(const a of data){
+        const pubs = Array.isArray(a.publications) ? a.publications : [];
+        for(const p of pubs){
+          const id = String(p.scopus_id || '').trim();
+          if(!id) continue;
+          const t = String(p.collab_type || 'Unknown').trim();
+          if(!byId.has(id)){
+            byId.set(id, t);
+          }else{
+            const prev = byId.get(id);
+            if(ORDER.indexOf(t) < ORDER.indexOf(prev)) byId.set(id, t);
+          }
+        }
+      }
+      let aus=0, local=0, intl=0;
+      for(const t of byId.values()){
+        if(t==='AUS') aus++;
+        else if(t==='Local') local++;
+        else if(t==='International') intl++;
+      }
+      return { totals:{aus, local, intl}, uniqueCount: byId.size };
+    }
+
+    function renderBar({aus, local, intl}, total){
+      const el = document.getElementById('mixbar');
+      el.innerHTML = '';
+      const pct = v => total ? Math.round(100*v/total) : 0;
+      const segs = [
+        {cls:'seg-aus',   w:pct(aus),   label:`AUS ${pct(aus)}%`},
+        {cls:'seg-local', w:pct(local), label:`Local ${pct(local)}%`},
+        {cls:'seg-intl',  w:pct(intl),  label:`International ${pct(intl)}%`},
+      ].filter(s => s.w > 0);
+
+      if(segs.length === 0){
+        el.style.minHeight = '28px';
+        el.style.background = '#f3f4f6';
+      }else{
+        segs.forEach(s => {
+          const d = document.createElement('div');
+          d.className = `seg ${s.cls}`;
+          d.style.width = `${s.w}%`;
+          d.textContent = s.label;
+          el.appendChild(d);
+        });
+      }
+
+      document.getElementById('mixmeta').textContent =
+        `${total} unique publications • AUS ${aus} • Local ${local} • International ${intl}`;
+    }
+
+    function renderChips({aus, local, intl}, total){
+      const s = document.getElementById('stats');
+      const pct = n => total ? Math.round(100*n/total) + '%' : '0%';
+      s.innerHTML = `
+        <div class="stat"><b>${total}</b> unique publications</div>
+        <div class="stat"><b>${aus}</b> AUS • ${pct(aus)}</div>
+        <div class="stat"><b>${local}</b> Local • ${pct(local)}</div>
+        <div class="stat"><b>${intl}</b> International • ${pct(intl)}</div>
+      `;
+    }
+
+    function attachSortHandlers(){
+      document.querySelectorAll('#tbl thead th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.getAttribute('data-key');
+          if(sortKey === key){
+            sortDir = (sortDir === 'asc') ? 'desc' : 'asc';
+          }else{
+            sortKey = key;
+            sortDir = (key === 'name' || key === 'department') ? 'asc' : 'desc';
+          }
+          updateHeaderIcons();
+          renderTable();
+        });
+      });
+    }
+
+    function updateHeaderIcons(){
+      document.querySelectorAll('#tbl thead th.sortable').forEach(th => {
+        th.classList.remove('sorted-asc','sorted-desc');
+        if(th.getAttribute('data-key') === sortKey){
+          th.classList.add(sortDir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+      });
+    }
+
+    function renderTable(){
+      const tb = document.querySelector('#tbl tbody');
+      tb.innerHTML = '';
+
+      const sorted = rows.slice().sort((a,b)=>{
+        const va = a[sortKey], vb = b[sortKey];
+        if(typeof va === 'number' && typeof vb === 'number'){
+          return sortDir === 'asc' ? va - vb : vb - va;
+        }
+        const sa = String(va||'').toLowerCase(), sb = String(vb||'').toLowerCase();
+        return sortDir === 'asc' ? sa.localeCompare(sb) : sb.localeCompare(sa);
+      });
+
+      sorted.forEach(r => {
+        const tr = document.createElement('tr');
+        const url = `authorships.html?aid=${encodeURIComponent(r.author_id)}&name=${encodeURIComponent(r.name)}&total=${encodeURIComponent(r.total_pubs)}`;
+        tr.innerHTML = `
+          <td class="author"><a href="${url}" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</a></td>
+          <td>${escapeHtml(r.department)}</td>
+          <td class="num">${r.total_pubs}</td>
+          <td class="num">${r.aus_pubs}</td>
+          <td class="num">${r.local_pubs}</td>
+          <td class="num">${r.intl_pubs}</td>
+        `;
+        tb.appendChild(tr);
+      });
+    }
+
+    function downloadCsv(){
+      const header = ['author_id','author_name','department','total_pubs','aus_pubs','local_pubs','intl_pubs'];
+      const lines = [header.join(',')].concat(
+        rows.map(r => [
+          r.author_id,
+          csvEsc(r.name),
+          csvEsc(r.department),
+          r.total_pubs,
+          r.aus_pubs,
+          r.local_pubs,
+          r.intl_pubs
+        ].join(','))
+      );
+      const csv = lines.join('\n');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+      a.download = 'authorships_overview.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function escapeHtml(s){
+      return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function csvEsc(s){
+      s = String(s ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }
+  </script>
+</body>
+</html>

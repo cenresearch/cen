@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Engineering Faculty</title>
+
+  <link href="https://unpkg.com/tabulator-tables@5.6.0/dist/css/tabulator.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/tabulator-tables@5.6.0/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root { --border:#e5e7eb; --fg:#111; --bg:#fff; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:16px; color:var(--fg); background:var(--bg); }
+    h1 { margin: 10px 0 14px; }
+
+    .controls { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 12px; }
+    input,button { padding:6px 10px; border:1px solid var(--border); border-radius:8px; }
+    button { cursor:pointer; }
+    #table { border:1px solid var(--border); }
+
+    /* thin grey line between rows */
+    .tabulator-row { border-bottom: 1px solid #d1d5db; }
+    .tabulator-row .tabulator-cell { border-bottom: 0 !important; }
+
+    /* wrap long text */
+    .tabulator-cell.wrap { white-space: normal !important; word-wrap: break-word; line-height: 1.4; }
+    .tabulator-cell { vertical-align: top; }
+
+    /* Top nav (shared across pages) */
+    .topnav{
+      position: sticky; top: 0; z-index: 1000;
+      display:flex; gap:10px; align-items:center;
+      background:#fff; border-bottom:1px solid var(--border);
+      padding:10px 12px; margin:-16px -16px 16px -16px;
+    }
+    .topnav a{
+      text-decoration:none; color:#334155; padding:6px 10px;
+      border-radius:6px; font-weight:500;
+    }
+    .topnav a:hover{ background:#f1f5f9; }
+    .topnav a.active{ background:#111827; color:#fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Shared top navigation -->
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters.html">Clusters</a>
+	<a href="radial.html">Radial Clusters</a>
+    <a href="themes.html">Themes</a>
+    <a href="classification.html">Classification</a>
+    <a href="authors.html">Authors</a>
+	<a href="authors_clusters.html">Authors-Clusters</a>
+	<a href="cen_collab.html">Collaborations</a>
+	<a href="metrics.html">Metrics</a>
+	<a href="process.html">Process Diagram</a>
+  </div>
+
+  <h1>Engineering Faculty</h1>
+
+  <div class="controls">
+    <input id="search" type="text" placeholder="Type to search">
+    <button id="download-xlsx">Download Excel</button>
+    <button id="download-csv">Download CSV</button>
+    <button id="clear">Clear filters</button>
+  </div>
+
+  <div id="table"></div>
+
+<script>
+/* highlight current page link in the top nav */
+(function(){
+  const norm = u => (u || "").split('?')[0].replace('./','') || 'index.html';
+  const current = norm(location.pathname.split('/').pop());
+  document.querySelectorAll('.topnav a').forEach(a => {
+    const target = norm(a.getAttribute('href'));
+    if (current === target || (current === 'index.html' && (target === '' || target === './'))) {
+      a.classList.add('active');
+    }
+  });
+})();
+
+const linkFormatter = (cell) => {
+  const url = (cell.getValue() || "").trim();
+  if (!url) return "";
+  const safe = url.replace(/"/g, "&quot;");
+  return `<a href="${safe}" target="_blank" rel="noopener">${safe}</a>`;
+};
+
+const columns = [
+  {title:"ORCID",       field:"orcid",      sorter:"string", headerFilter:"input", width:160},
+  {title:"Scopus ID",   field:"scopus_id",  sorter:"number", headerFilter:"input", width:120, hozAlign:"center", headerHozAlign:"center"},
+  {title:"First Name",  field:"first_name", sorter:"string", headerFilter:"input", width:150, hozAlign:"center", headerHozAlign:"center"},
+  {title:"Last Name",   field:"last_name",  sorter:"string", headerFilter:"input", width:150, hozAlign:"center", headerHozAlign:"center"},
+  {title:"Department",  field:"department", sorter:"string", headerFilter:"input", width:160, hozAlign:"center", headerHozAlign:"center"},
+  {title:"Designation", field:"designation", sorter:"string", headerFilter:"input", width:140, cssClass:"wrap", formatter:"textarea"},
+  {title:"Scopus URL",  field:"scopus_url", sorter:"string", headerFilter:"input", width:320, cssClass:"wrap", formatter:linkFormatter},
+];
+
+const table = new Tabulator("#table", {
+  layout:"fitDataStretch",
+  ajaxURL:"aus_authors.json",
+  pagination:false,          // no internal pagination -> page scrolls
+  columns,
+  variableHeight:true,       // allow wrapped rows to grow
+  columnDefaults:{ vertAlign:"top" }
+});
+
+// global search
+const searchInput = document.getElementById("search");
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim();
+  if (!q) { table.clearFilter(true); return; }
+  const fields = columns.map(c => c.field);
+  table.setFilter(fields.map(f => ({field:f, type:"like", value:q})), "or");
+});
+
+// downloads
+document.getElementById("download-xlsx").addEventListener("click", () => {
+  table.download("xlsx", "authors.xlsx", {sheetName:"Authors"});
+});
+document.getElementById("download-csv").addEventListener("click", () => {
+  table.download("csv", "authors.csv");
+});
+
+// clear filters
+document.getElementById("clear").addEventListener("click", () => {
+  searchInput.value = "";
+  table.clearFilter(true);
+});
+</script>
+</body>
+</html>

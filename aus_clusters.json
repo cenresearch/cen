@@ -1,0 +1,32 @@
+[
+  {
+    "cluster_id": 1,
+    "name": "Intelligent and Next-Generation Systems",
+    "description": "Intelligent and next-generation systems is a multidisciplinary field that combines principles of engineering with decision-making systems to improve human life. Numerous research projects conducted by experienced AUS-CEN researchers cover this research theme. This field spans a wide range of areas including robotics, intelligent autonomous systems, unmanned air vehicles, computer vision, face biometrics, neuroengineering, sensors and connectivity, electronic chip design, flexible and wearable electronics, cyber physical systems, control of physical systems, sustainable and resilient operation and maintenance of civil infrastructures, networking, electronic warfare systems, communication systems, and satellite systems and applications. Due to the importance and nature of this theme to achieve the UAEs’ Sustainable Development Goals and with the large capacity of available well-reputed researchers, the college is looking forward to establishing an Endowed Chair in Intelligent and Next-Generation Systems."
+  },
+  {
+    "cluster_id": 2,
+    "name": "Bioengineering",
+    "description": "Bioengineering is a multidisciplinary field that combines principles of physics, chemistry and biology with engineering sciences to study and advance knowledge in biology, anatomy, physiology and human health. A bioengineer can develop diagnostic instruments, novel materials, drug delivery systems or informatics, to name a few examples. The main objective of the bioengineering field is to improve patients' quality of life and help advance health professions. This discipline is rapidly evolving throughout the world, with excellent employment opportunities. The American University of Sharjah College of Engineering has expertise in various areas of bioengineering, including biosensors, implantable devices, bioprocesses, drug delivery, microfluidics, medical imaging, signal processing, bio-informatics and neuroengineering. AUS research projects range from examining the severity of spinal cord injury to a patented technology aimed at reducing the side effects of chemotherapy. With this wide array of research and skills, the college is seeking to establish an Endowed Chair in Bioengineering."
+  },
+  {
+    "cluster_id": 3,
+    "name": "Materials, Mechanics, Manufacturing and Structure",
+    "description": "The research efforts within the College of Engineering at AUS span across various areas related to materials, structures and manufacturing. About 25 faculty members from the different engineering departments conduct cutting-edge research under this cluster with significant productivity in terms of publications in international journals and graduating students with significant expertise in these relevant engineering and scientific fields. Industry-relevant and practical research projects include the development of polymers and composite materials, 3D printing, advanced manufacturing, engineering structures and structural materials, advanced and functional smart materials, and non-destructive assessment and structural health monitoring. With this wide array of research and skills, the college is seeking to establish an endowed chair for this research cluster."
+  },
+  {
+    "cluster_id": 4,
+    "name": "Artificial Intelligence and Data Science",
+    "description": "AUS faculty have been active in the development and application of AI techniques in their respective fields of research. The faculty are engaged in AI-related research in wide-ranging areas including computer vision, image, audio and video analytics, Internet of Things (IoT), education, computer security, signal analysis, earthquake prediction, power and manufacturing system applications, biomedical applications, logistics and transportation, natural disaster management, structural systems and components, and geospatial science and remote sensing. Moreover, AI has the potential to add value to a variety of industries that are the backbone of the UAE economy including travel and transportation, logistics, retail, oil and gas, chemicals, media and entertainment, banking and insurance, healthcare and telecommunications. The College of Engineering at AUS seeks to establish an Endowed Chair in AI to support high-quality undergraduate and graduate research and development in the various areas of AI and its applications."
+  },
+  {
+    "cluster_id": 5,
+    "name": "Supply Chain, Logistics and Transportation Systems",
+    "description": "The UAE 2021-2030 roadmap initiatives bring new opportunities and improvements to the availability and mobility of goods and services. These strategic initiatives aim at cutting transportation costs by 44 percent, reducing environmental pollution by 12 percent, as well as generating AED 18 billion in annual economic returns by increasing the efficiency of the transportation and logistics sector in Dubai alone. With the advent of new technologies such as artificial intelligence (AI), autonomous vehicles, data science and blockchain, the supply chain industry is deploying new solutions, leaning continuously towards increasing operational efficiency and cutting costs, while addressing global sustainability concerns. The College of Engineering is seeking to establish an Endowed Chair in Supply Chain, Logistics and Transportation."
+  },
+  {
+    "cluster_id": 6,
+    "name": "Energy, Water and Sustainable Environment",
+    "description": "The AUS College of Engineering is at the forefront of research in the fields of energy, water and sustainable environment, collectively accumulating valuable experience and expertise in these areas. The engineering faculty at AUS have developed significant laboratory infrastructure to support research activities in this area. AUS faculty and scholars have been involved in research to find viable solutions to the challenging problems that arise in these key areas, with the findings and results of their cutting-edge studies being published in reputable international journals."
+  }
+]

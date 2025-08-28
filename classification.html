@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cluster Theme Classification - Publications 1/1/2022 - 15/8/2025</title>
+
+  <link href="https://unpkg.com/tabulator-tables@5.6.0/dist/css/tabulator.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/tabulator-tables@5.6.0/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root { --border:#e5e7eb; --fg:#111; --bg:#fff; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:16px; color:var(--fg); background:var(--bg); }
+    h1 { margin: 10px 0 14px; }
+
+    .controls { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+    input,button { padding:6px 10px; border:1px solid var(--border); border-radius:8px; }
+    button { cursor:pointer; }
+    #table { border:1px solid var(--border); }
+
+    /* thin grey line between rows */
+    .tabulator-row { border-bottom: 1px solid #d1d5db; }
+    .tabulator-row .tabulator-cell { border-bottom: 0 !important; }
+
+    /* wrap long text; keep rows compact but allow growth */
+    .tabulator-row .tabulator-cell { padding-top:6px; padding-bottom:6px; }
+    .tabulator-cell { vertical-align: top; }
+    .wrap { white-space: normal !important; word-wrap: break-word; line-height: 1.4; }
+    .tabulator-cell .tabulator-data-tree-branch { display:none; } /* just in case, no tree */
+
+    /* Top nav (shared) */
+    .topnav{
+      position: sticky; top: 0; z-index: 1000;
+      display:flex; gap:10px; align-items:center;
+      background:#fff; border-bottom:1px solid var(--border);
+      padding:10px 12px; margin:-16px -16px 16px -16px;
+    }
+    .topnav a{
+      text-decoration:none; color:#334155; padding:6px 10px;
+      border-radius:6px; font-weight:500;
+    }
+    .topnav a:hover{ background:#f1f5f9; }
+    .topnav a.active{ background:#111827; color:#fff; }
+  </style>
+</head>
+<body>
+
+  <!-- Shared top navigation -->
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters.html">Clusters</a>
+	<a href="radial.html">Radial Clusters</a>
+    <a href="themes.html">Themes</a>
+    <a href="classification.html">Classification</a>
+    <a href="authors.html">Authors</a>
+	<a href="authors_clusters.html">Authors-Clusters</a>
+	<a href="cen_collab.html">Collaborations</a>
+	<a href="metrics.html">Metrics</a>
+	<a href="process.html">Process Diagram</a>
+  </div>
+
+  <h1>Cluster Theme Classification - Publications: 1/1/2022 - 15/8/2025</h1>
+
+  <div class="controls">
+    <input id="search" type="text" placeholder="Type to search">
+    <button id="download-xlsx">Download Excel</button>
+    <button id="download-csv">Download CSV</button>
+    <button id="clear">Clear filters</button>
+  </div>
+
+  <div id="table"></div>
+
+<script>
+/* highlight current page link in the top nav */
+(function(){
+  const norm = u => (u || "").split('?')[0].replace('./','') || 'index.html';
+  const current = norm(location.pathname.split('/').pop());
+  document.querySelectorAll('.topnav a').forEach(a => {
+    const target = norm(a.getAttribute('href'));
+    if (current === target || (current === 'index.html' && (target === '' || target === './'))) {
+      a.classList.add('active');
+    }
+  });
+})();
+
+/* Fixed widths for all columns + wrap on text-heavy ones */
+const columns = [
+  {title:"Cluster ID", field:"cluster_id", sorter:"number", headerFilter:"input", width:120, hozAlign:"center", headerHozAlign:"center"},
+  {title:"Theme ID",   field:"theme_id",   sorter:"number", headerFilter:"input", width:120, hozAlign:"center", headerHozAlign:"center"},
+  {title:"Explanation", field:"explanation", sorter:"string", headerFilter:"input", width:380,
+    cssClass:"wrap", formatter:"textarea", tooltip:cell => (cell.getValue() || "").trim()},
+  {title:"Title", field:"title", sorter:"string", headerFilter:"input", width:360,
+    cssClass:"wrap", formatter:"textarea", tooltip:cell => (cell.getValue() || "").trim()},
+  {title:"Abstract", field:"abstract", sorter:"string", headerFilter:"input", width:540,
+    cssClass:"wrap", formatter:"textarea", tooltip:cell => (cell.getValue() || "").trim()},
+];
+
+const table = new Tabulator("#table", {
+  layout:"fitDataStretch",     // respects fixed widths; table may extend horizontally if needed
+  ajaxURL:"aus_classification.json",
+  pagination:false,            // show all rows; page scrolls
+  columns,
+  variableHeight:true,         // allow rows to grow as text wraps
+  columnDefaults:{ vertAlign:"top" }
+});
+
+// global search
+const searchInput = document.getElementById("search");
+searchInput.addEventListener("input", () => {
+  const q = searchInput.value.trim();
+  if (!q) { table.clearFilter(true); return; }
+  const fields = columns.map(c => c.field);
+  table.setFilter(fields.map(f => ({field:f, type:"like", value:q})), "or");
+});
+
+// downloads
+document.getElementById("download-xlsx").addEventListener("click", () => {
+  table.download("xlsx", "cluster_theme_classification.xlsx", {sheetName:"Data"});
+});
+document.getElementById("download-csv").addEventListener("click", () => {
+  table.download("csv", "cluster_theme_classification.csv");
+});
+
+// clear filters
+document.getElementById("clear").addEventListener("click", () => {
+  searchInput.value = "";
+  table.clearFilter(true);
+});
+</script>
+</body>
+</html>

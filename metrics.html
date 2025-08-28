@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Metrics</title>
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --blue:#2563eb; --red:#dc2626; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+
+    .topnav { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); display: flex; gap: 16px; padding: 10px 16px; z-index: 2000; }
+    .topnav a { text-decoration: none; color: #111; font-size: 14px; font-weight: 500; }
+    .topnav a:hover { color: #007acc; }
+    .topnav a.active { background:#111; color:#fff; font-weight:700; padding:4px 10px; border-radius:8px; }
+
+    .wrap{ padding:12px; display:grid; gap:12px; }
+
+    /* first two panels narrower */
+    .grid{
+      display:grid;
+      grid-template-columns: 500px 500px 1fr;
+      gap:12px;
+      align-items:start;
+    }
+
+    .panel{
+      background:#fff; border:1px solid var(--border); border-radius:10px;
+      box-shadow:0 1px 2px rgba(0,0,0,.03); width:100%;
+    }
+    .panel h3{ margin:8px 10px; font-size:14px; font-weight:800;color:#16a34a; }
+    .panel .subtle{ margin:0 10px 6px; color:var(--muted); font-size:12px; }
+
+    /* tight internals */
+    .panel .inner{ padding:12px 20px 0 }
+    .legend{ padding:0 8px 4px; color:#374151; font-size:12px; }
+    .rednote{ padding:0 8px 8px; color:var(--red); font-size:11px; }
+
+    /* in-panel controls (sliders) */
+    .controls-inline{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:6px 8px 0 }
+    .controls-inline .range-wrap{ display:flex; align-items:center; gap:6px }
+    .controls-inline input[type="range"]{ width:200px }
+    .btn{ font-size:12px; padding:6px 8px; border:1px solid var(--border); border-radius:8px; background:#fff; cursor:pointer; }
+    .btn:hover{ border-color:#cbd5e1; }
+
+    svg{ display:block; width:100%; height:auto }
+    #p1chart,#p2chart,#p3chart{ margin:10; padding:10 }
+
+    /* tooltip */
+    .tooltip {
+      position: fixed; pointer-events: none; background:#111; color:#fff;
+      padding:6px 8px; border-radius:6px; font-size:12px; line-height:1.2;
+      opacity:0; transform:translateY(-4px);
+      transition: opacity .08s ease, transform .08s ease;
+      box-shadow:0 2px 10px rgba(0,0,0,.15); z-index:3000; max-width:320px; white-space:nowrap;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters.html">Clusters</a>
+    <a href="radial.html">Radial Clusters</a>
+    <a href="themes.html">Themes</a>
+    <a href="classification.html">Classification</a>
+    <a href="authors.html">Authors</a>
+    <a href="authors_clusters.html">Authors-Clusters</a>
+    <a href="cen_collab.html">Collaborations</a>
+	<a href="metrics.html">Metrics</a>
+    <a href="process.html">Process Diagram</a>
+  </div>
+
+  <script>
+    (function () {
+      const current = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+      document.querySelectorAll('.topnav a').forEach(a => {
+        const href = (a.getAttribute('href') || '').split('?')[0];
+        const target = (href.split('/').pop() || 'index.html');
+        if (target === current || (href === './' && (current === '' || current === 'index.html'))) a.classList.add('active');
+      });
+    })();
+  </script>
+
+  <div class="wrap">
+    <div class="grid">
+      <!-- Panel 1 -->
+      <div class="panel" id="panel1">
+        <h3>Publications by Aggregation Type</h3>
+        <div class="subtle" id="p1meta"></div>
+
+        <!-- date sliders INSIDE panel (top of graph) -->
+        <div class="controls-inline">
+          <div class="range-wrap">
+            <label for="startIdx">Start</label>
+            <input type="range" id="startIdx" min="0" max="0" value="0" />
+            <span id="startLabel" style="min-width:70px;">—</span>
+          </div>
+          <div class="range-wrap">
+            <label for="endIdx">End</label>
+            <input type="range" id="endIdx" min="0" max="0" value="0" />
+            <span id="endLabel" style="min-width:70px;">—</span>
+          </div>
+          <button id="resetBtn" class="btn">Reset</button>
+          <button id="p1csv" class="btn">Download CSV</button>
+        </div>
+
+        <div class="inner" id="p1chart"></div>
+        <div class="legend" id="p1legend"></div>
+      </div>
+
+      <!-- Panel 2 -->
+      <div class="panel" id="panel2">
+        <h3>Topics Rank-Frequency</h3>
+        <div class="subtle" id="p2meta"></div>
+        <div class="inner" id="p2chart"></div>
+        <div class="controls-inline">
+          <button id="p2csv" class="btn">Download CSV</button>
+        </div>
+        <div class="legend" id="p2legend"></div>
+        <div class="rednote" id="p2note"></div>
+      </div>
+
+      <!-- Panel 3 -->
+      <div class="panel" id="panel3">
+        <h3>Topics by Count</h3>
+        <div class="subtle" id="p3meta"></div>
+
+        <!-- slider INSIDE panel (top of graph) -->
+        <div class="controls-inline">
+          <div class="range-wrap">
+            <label for="p3limit">Top</label>
+            <input type="range" id="p3limit" min="5" max="20" value="10" />
+            <span id="p3limitLabel">10</span>
+          </div>
+          <button id="p3csv" class="btn">Download CSV</button>
+        </div>
+
+        <div class="inner" id="p3chart"></div>
+        <div class="legend" id="p3legend"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let baseRows = [];
+    let months = [];
+    let topicsData = [];
+
+    const tip = document.createElement('div');
+    tip.className = 'tooltip';
+    document.body.appendChild(tip);
+
+    const debounce = (fn, ms=120) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; };
+
+    (async function init(){
+      const ts = Date.now();
+      const res = await fetch(`./metrics.json?v=${ts}`);
+      const data = await res.json();
+
+      baseRows = (data.rows || []).map(r => ({
+        scopus_id: String(r.scopus_id || ''),
+        aggregation_type: (r.aggregation_type || 'Unknown').trim() || 'Unknown',
+        date: r.pub_date ? new Date(r.pub_date) : null
+      })).filter(r => r.date instanceof Date && !isNaN(r.date));
+
+      topicsData = (data.topics || []).map((d, i) => ({
+        code: String(d.code || ''), name: String(d.name || ''), cnt: +d.cnt || 0, rank: i + 1
+      }));
+
+      // months 2020-01..current UTC month
+      const today = new Date();
+      const startFixed = new Date(Date.UTC(2020, 0, 1));
+      const current = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+      for (let d = new Date(startFixed); d <= current; d = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth()+1, 1))){
+        months.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}`);
+      }
+
+      setupMonthSliders(true);
+      setupP3Slider();
+      renderAll();
+
+      document.getElementById('p1csv').addEventListener('click', downloadP1Csv);
+      document.getElementById('p2csv').addEventListener('click', downloadP2Csv);
+      document.getElementById('p3csv').addEventListener('click', downloadP3Csv);
+      document.getElementById('resetBtn').addEventListener('click', () => { setupMonthSliders(true); renderAll(); });
+
+      window.addEventListener('resize', debounce(renderAll, 120));
+    })();
+
+    function setupMonthSliders(resetToFull=false){
+      const s = document.getElementById('startIdx');
+      const e = document.getElementById('endIdx');
+      const maxIdx = Math.max(0, months.length - 1);
+      s.min = e.min = '0'; s.max = e.max = String(maxIdx);
+      if (resetToFull) { s.value = '0'; e.value = String(maxIdx); }
+      else { if (!s.value) s.value = '0'; if (!e.value) e.value = String(maxIdx); }
+      const update = () => { if (+s.value > +e.value) s.value = e.value; if (+e.value < +s.value) e.value = s.value; updateMonthLabels(); renderAll(); };
+      s.oninput = update; e.oninput = update; updateMonthLabels();
+    }
+
+    function setupP3Slider(){
+      const limit = document.getElementById('p3limit');
+      const label = document.getElementById('p3limitLabel');
+      const max = Math.min(50, Math.max(5, topicsData.length));
+      limit.max = String(max);
+      if (+limit.value > max) limit.value = String(Math.min(10, max));
+      label.textContent = limit.value;
+      limit.oninput = () => { label.textContent = limit.value; renderP3(); };
+    }
+
+    function updateMonthLabels(){
+      const sIdx = +document.getElementById('startIdx').value;
+      const eIdx = +document.getElementById('endIdx').value;
+      document.getElementById('startLabel').textContent = months[sIdx] || '—';
+      document.getElementById('endLabel').textContent = months[eIdx] || '—';
+    }
+
+    function currentMonthRange(){
+      const sIdx = +document.getElementById('startIdx').value;
+      const eIdx = +document.getElementById('endIdx').value;
+      return { sIdx, eIdx };
+    }
+
+    function filteredRows(){
+      const { sIdx, eIdx } = currentMonthRange();
+      const startKey = months[sIdx], endKey = months[eIdx];
+      if (!startKey || !endKey) return [];
+      const sY = +startKey.slice(0,4), sM = +startKey.slice(5,7) - 1;
+      const eY = +endKey.slice(0,4),   eM = +endKey.slice(5,7) - 1;
+      const start = new Date(Date.UTC(sY, sM, 1));
+      const end   = new Date(Date.UTC(eY, eM + 1, 1));
+      return baseRows.filter(r => r.date >= start && r.date < end);
+    }
+
+    function renderAll(){ renderP1(); renderP2(); renderP3(); }
+
+    function containerWidth(id, min=300){
+      return Math.max(min, Math.floor(document.getElementById(id).getBoundingClientRect().width));
+    }
+
+    // Panel 1
+    function renderP1(){
+      const rows = filteredRows();
+      const counts = new Map();
+      for (const r of rows){ const k = r.aggregation_type || 'Unknown'; counts.set(k, (counts.get(k) || 0) + 1); }
+      const data = Array.from(counts.entries()).map(([k,v]) => ({type:k, count:v}))
+        .sort((a,b) => b.count - a.count || a.type.localeCompare(b.type));
+
+      const total = data.reduce((s,d)=>s+d.count,0);
+      const { sIdx, eIdx } = currentMonthRange();
+      document.getElementById('p1meta').textContent = `Showing ${total} publications • ${months[sIdx]} to ${months[eIdx]}`;
+
+      const mount = document.getElementById('p1chart'); mount.innerHTML = '';
+      const W = containerWidth('p1chart');
+      const L = 140, R = 28, T = 6, B = 18;
+      const barH = 18;
+      const H = Math.max(40, data.length * (barH + 6) + T + B);
+
+      const x = d3.scaleLinear().domain([0, d3.max(data, d => d.count) || 1]).range([L, W - R]);
+      const y = d3.scaleBand().domain(data.map(d => d.type)).range([T, H - B]).padding(0.22);
+
+      const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`);
+      const g = svg.append('g');
+
+      g.append('g').selectAll('text').data(data).join('text')
+        .attr('x', L - 8).attr('y', d => y(d.type) + y.bandwidth()/2).attr('dy', '0.35em')
+        .attr('text-anchor', 'end').attr('font-size', 11).text(d => d.type);
+
+      g.append('g').selectAll('rect').data(data).join('rect')
+        .attr('x', L).attr('y', d => y(d.type))
+        .attr('width', d => Math.max(2, x(d.count) - L))
+        .attr('height', y.bandwidth()).attr('fill', '#2563eb').attr('opacity', 0.5);
+
+      g.append('g').selectAll('text.count').data(data).join('text')
+        .attr('class','count').attr('x', d => x(d.count) + 4)
+        .attr('y', d => y(d.type) + y.bandwidth()/2).attr('dy', '0.35em')
+        .attr('font-size', 11).attr('fill', '#111').text(d => d.count);
+
+      mount.appendChild(svg.node());
+      document.getElementById('p1legend').textContent = '';
+    }
+
+    // Panel 2
+    function renderP2(){
+      const arr = topicsData;
+      const mount = document.getElementById('p2chart'); mount.innerHTML = '';
+      if (!arr.length){ document.getElementById('p2meta').textContent = 'No topics'; document.getElementById('p2legend').textContent = ''; document.getElementById('p2note').textContent=''; return; }
+
+      const totalTopics = arr.length;
+      const totalCount = d3.sum(arr, d => d.cnt);
+      const target = 0.8 * totalCount;
+      let cum = 0, rank80 = arr[arr.length - 1]?.rank || 1;
+      for (const d of arr){ cum += d.cnt; if (cum >= target){ rank80 = d.rank; break; } }
+
+      document.getElementById('p2meta').textContent = `Topics ${totalTopics} • 80% at rank ${rank80}`;
+
+      const W = containerWidth('p2chart');
+      const H = 240;
+      const L = 44, R = 10, T = 10, B = 24;
+
+      const x = d3.scaleLinear().domain([1, d3.max(arr, d => d.rank) || 1]).range([L, W - R]).nice();
+      const y = d3.scaleLinear().domain([0, d3.max(arr, d => d.cnt) || 1]).range([H - B, T]).nice();
+
+      const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`);
+      const g = svg.append('g');
+
+      const gx = g.append('g').attr('transform', `translate(0,${H - B})`).call(d3.axisBottom(x).ticks(8).tickSizeOuter(0));
+      const gy = g.append('g').attr('transform', `translate(${L},0)`).call(d3.axisLeft(y).ticks(6).tickSizeOuter(0));
+
+      const plotMidX = L + (W - R - L)/2;
+      const plotMidY = T + (H - B - T)/2;
+
+      gx.append('text').attr('x', plotMidX).attr('y', 22).attr('fill', '#111').attr('text-anchor', 'middle').attr('font-size', 11).text('Rank');
+      gy.append('text').attr('transform', 'rotate(-90)').attr('x', -plotMidY).attr('y', -32).attr('fill', '#111').attr('text-anchor', 'middle').attr('font-size', 11).text('Count of author topics');
+
+      g.append('g').selectAll('circle').data(arr).join('circle')
+        .attr('cx', d => x(d.rank)).attr('cy', d => y(d.cnt)).attr('r', 3.5).attr('fill', '#2563eb').attr('opacity', 0.5)
+        .on('mousemove', (ev, d) => { tip.style.opacity = 1; tip.style.transform = 'translateY(0)'; tip.style.left = (ev.clientX + 12) + 'px'; tip.style.top  = (ev.clientY + 12) + 'px'; tip.innerHTML = `${d.name} · ${d.code}<br>rank ${d.rank} · count ${d.cnt}`; })
+        .on('mouseleave', () => { tip.style.opacity = 0; tip.style.transform = 'translateY(-4px)'; });
+
+      g.append('line').attr('x1', x(rank80)).attr('x2', x(rank80)).attr('y1', T).attr('y2', H - B)
+        .attr('stroke', '#dc2626').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
+      g.append('text').attr('x', x(rank80)).attr('y', T + 12).attr('text-anchor', 'middle').attr('fill', '#dc2626').attr('font-size', 11).text('80%');
+
+      mount.appendChild(svg.node());
+      document.getElementById('p2legend').textContent = 'Rank-frequency of author_topics names.';
+      document.getElementById('p2note').textContent = '';
+    }
+
+    // Panel 3
+    function renderP3(){
+      const mount = document.getElementById('p3chart'); mount.innerHTML = '';
+      const p3meta = document.getElementById('p3meta');
+      const p3legend = document.getElementById('p3legend');
+
+      if (!topicsData.length){ p3meta.textContent='No topics'; p3legend.textContent=''; return; }
+
+      const topN = +document.getElementById('p3limit').value || 10;
+      const arr = topicsData.slice(0, topN); // already sorted by cnt desc
+      const maxCnt = d3.max(arr, d => d.cnt) || 1;
+
+      p3meta.textContent = `Top ${topN} topics by count`;
+      p3legend.textContent = 'y topic name • x count';
+
+      const W = containerWidth('p3chart');
+      const L = 290, R = 20, T = 6, B = 35;
+      const H = T + B + arr.length * (18 + 6);
+
+      const x = d3.scaleLinear().domain([0, maxCnt]).range([L, W - R]).nice();
+      const y = d3.scaleBand().domain(arr.map(d => d.name)).range([T, H - B]).padding(0.80);
+
+      const svg = d3.create('svg').attr('viewBox', `0 0 ${W} ${H}`);
+      const g = svg.append('g');
+
+      g.append('g').selectAll('text').data(arr).join('text')
+        .attr('x', L - 8).attr('y', d => y(d.name) + y.bandwidth()/2).attr('dy', '0.35em')
+        .attr('text-anchor', 'end').attr('font-size', 11).text(d => d.name);
+
+      g.append('g').selectAll('rect').data(arr).join('rect')
+        .attr('x', L).attr('y', d => y(d.name)).attr('height', y.bandwidth())
+        .attr('width', d => Math.max(2, x(d.cnt) - L)).attr('fill', '#2563eb').attr('opacity', 0.5)
+        .on('mousemove', (ev, d) => { tip.style.opacity = 1; tip.style.transform = 'translateY(0)'; tip.style.left = (ev.clientX + 12) + 'px'; tip.style.top  = (ev.clientY + 12) + 'px'; tip.innerHTML = `${d.name} · ${d.code}<br>count ${d.cnt}`; })
+        .on('mouseleave', () => { tip.style.opacity = 0; tip.style.transform = 'translateY(-4px)'; });
+
+      g.append('g').selectAll('text.count').data(arr).join('text')
+        .attr('class','count').attr('x', d => x(d.cnt) + 4).attr('y', d => y(d.name) + y.bandwidth()/2)
+        .attr('dy', '0.35em').attr('font-size', 11).attr('fill', '#111').text(d => d.cnt);
+
+      g.append('g').attr('transform', `translate(0,${H - B})`)
+        .call(d3.axisBottom(x).ticks(6).tickSizeOuter(0))
+        .call(g => g.append('text')
+          .attr('x', L + (W - R - L)/2).attr('y', 35).attr('fill', '#111').attr('text-anchor', 'middle').attr('font-size', 11)
+          .text('Count'));
+
+      mount.appendChild(svg.node());
+    }
+
+    // CSV helpers
+    function downloadP1Csv(){
+      const rows = filteredRows();
+      const counts = new Map();
+      for (const r of rows){ const k = r.aggregation_type || 'Unknown'; counts.set(k, (counts.get(k) || 0) + 1); }
+      const arr = Array.from(counts.entries()).map(([k,v]) => ({aggregation_type:k, count:v}))
+        .sort((a,b)=> b.count - a.count || a.aggregation_type.localeCompare(b.aggregation_type));
+      saveCsv('aggregation_type_counts.csv', 'aggregation_type,count', arr.map(o => `${csvEsc(o.aggregation_type)},${o.count}`));
+    }
+    function downloadP2Csv(){
+      const arr = topicsData.map(d => ({ rank:d.rank, code:d.code, name:d.name, count:d.cnt }));
+      saveCsv('topics_rank_frequency.csv', 'rank,code,name,count', arr.map(o => [o.rank, csvEsc(o.code), csvEsc(o.name), o.count].join(',')));
+    }
+    function downloadP3Csv(){
+      const topN = +document.getElementById('p3limit').value || 10;
+      const arr = topicsData.slice(0, topN).map(d => ({ name:d.name, code:d.code, count:d.cnt }));
+      saveCsv('top_topics_bar.csv', 'name,code,count', arr.map(o => [csvEsc(o.name), csvEsc(o.code), o.count].join(',')));
+    }
+    function saveCsv(filename, header, linesArr){
+      const csv = [header].concat(linesArr).join('\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+    }
+    function csvEsc(s){ s = String(s ?? ''); return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s; }
+  </script>
+</body>
+</html>

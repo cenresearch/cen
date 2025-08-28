@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Collaborator Heat Maps</title>
+
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; --blue:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+
+    header{
+      position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--border);
+      padding:8px 12px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    }
+    header .left{ justify-self:start; }
+    header .center{ justify-self:center; font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    header .right{ justify-self:end; }
+    header a{ text-decoration:none; color:var(--blue); font-weight:600; }
+
+    .legend{ display:flex; align-items:center; gap:8px; font-size:12px; color:#374151; }
+    .legend .bar{ width:120px; height:8px; border-radius:6px; background:linear-gradient(90deg,#eef2ff,#60a5fa,#1d4ed8); border:1px solid #e5e7eb; }
+
+    /* top stacked bar */
+    .stackbar-wrap{ padding:10px 12px; }
+    .stackbar{
+      display:flex; height:26px; border:1px solid #cbd5e1; border-radius:999px; overflow:hidden;
+      max-width:1100px; margin:0 12px;
+    }
+    .seg{
+      display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; color:#fff; white-space:nowrap;
+    }
+
+    /* one horizontal row, no horizontal scroll */
+    .boards{
+      padding:10px 12px 16px;
+      display:flex;
+      flex-wrap:nowrap;
+      gap:8px;
+      align-items:flex-start;
+      overflow-x:hidden;
+    }
+
+    .board{
+      border:1px solid var(--border); border-radius:10px; padding:6px 8px;
+      box-shadow:0 1px 2px rgba(0,0,0,0.03);
+      flex:0 0 auto;
+      background:#fff;
+      overflow:hidden;
+      width:150px;     /* narrow fixed width so all 6 fit */
+    }
+
+    .board-title{ margin:0 0 6px; font-weight:800; font-size:14px; text-align:center; }
+    .note{ padding:0 12px 14px; color:#6b7280; font-size:12px; }
+
+    .tooltip{
+      position:fixed; background:#111; color:#fff; font-size:12px; padding:6px 8px; border-radius:6px;
+      pointer-events:none; opacity:0; transform:translate(-50%,-120%); white-space:nowrap;
+    }
+    svg{ width:100%; height:auto; display:block; }
+    .board svg{ overflow:visible; }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <header>
+    <div class="left"><a href="javascript:history.back()">← Back</a></div>
+    <div id="title" class="center"></div>
+    <div class="right">
+      <div class="legend"><span>fewer</span><div class="bar"></div><span>more</span></div>
+    </div>
+  </header>
+
+  <!-- Top stacked bar -->
+  <div class="stackbar-wrap">
+    <div id="mixbar" class="stackbar" aria-label="collaboration mix"></div>
+  </div>
+
+  <!-- single horizontal row with six boxes -->
+  <div class="boards" id="boards"></div>
+  <div class="note">Hover a cell to see the collaborator name and count.</div>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const aid = qs.get('aid');
+    const rawName = decodeURIComponent(qs.get('name') || '');
+
+    function baseNameOnly(s){
+      let out = s || '';
+      while (/\s*\([^)]*\)\s*$/.test(out)) out = out.replace(/\s*\([^)]*\)\s*$/,'');
+      return out.trim();
+    }
+
+    const authorNameFull = baseNameOnly(rawName);
+    document.getElementById('title').textContent = `${authorNameFull}  Co-authorship`;
+
+    // exactly six types in this order
+    const TYPE_ORDER = ['Same_Dept','Regional','Local','AUS','International','CEN'];
+    const TYPE_COLOR = {
+      Same_Dept: '#FFA23A',
+      Regional: '#0ea5e9',
+      Local: '#10b981',
+      AUS: '#740E4C',
+      International: '#ef4444',
+      CEN: '#EF39A7'
+    };
+
+    /* compact layout to fit six cards */
+    const CELL_W = 6;
+    const COUNT_W = 12;
+    const ROW_H  = 20;
+    const TOP_H  = 22;
+    const LEFT_LABEL_W = 92;
+    const MARGIN = { top: TOP_H, right: 6, bottom: 32, left: LEFT_LABEL_W };
+    const EXTRA_ROWS = 1;
+
+    const boardsEl = document.getElementById('boards');
+    const tip = document.getElementById('tooltip');
+
+    function hexToRGBA(hex, alpha){
+      const m = hex.replace('#','');
+      const n = parseInt(m,16);
+      return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${alpha})`;
+    }
+
+    (async function init(){
+      const ts = Date.now();
+      const r = await fetch(`./aus_authors_collaborators.json?v=${ts}`);
+      const arr = await r.json();
+      const rec = arr.find(x => String(x.author_id) === String(aid));
+      if(!rec){
+        boardsEl.innerHTML = '<p style="padding:12px;">No collaborators found.</p>';
+        renderBarFromStats([], 0);
+        document.getElementById('title').textContent = `${authorNameFull}  0 total Co-authors`;
+        return;
+      }
+
+      // header with total unique co-authors
+      const totalCoauthors = (rec.collaborators || []).length;
+      document.getElementById('title').textContent = `${authorNameFull}  ${totalCoauthors} total Co-authors`;
+
+      render(rec);
+    })();
+
+    function render(rec){
+      const rows = (rec.collaborators || []).map(d => ({
+        name: d.coauthor_name || `ID ${d.coauthor_id}`,
+        shared: Number(d.shared_pubs) || 0,
+        type: String(d.collab_type || 'Unknown').trim()
+      }));
+
+      const filtered = rows.filter(r => TYPE_ORDER.includes(r.type));
+
+      const total = filtered.length;
+      const statsMap = new Map(TYPE_ORDER.map(t => [t, 0]));
+      filtered.forEach(r => statsMap.set(r.type, statsMap.get(r.type) + 1));
+
+      renderBarFromStats(Array.from(statsMap, ([type, n]) => ({type, n})), total);
+
+      boardsEl.innerHTML = '';
+
+      const maxShared = d3.max(filtered, d => d.shared) || 1;
+      const color = d3.scaleSequential().domain([0, maxShared]).interpolator(d3.interpolateBlues);
+
+      TYPE_ORDER.forEach(type => {
+        const items = filtered
+          .filter(r => r.type === type)
+          .sort((a,b)=> b.shared - a.shared || a.name.localeCompare(b.name));
+        renderBoard(type, items, color);
+      });
+    }
+
+    function renderBarFromStats(stats, total){
+      const el = document.getElementById('mixbar');
+      el.innerHTML = '';
+      if (!total){
+        el.style.background = '#f3f4f6';
+        el.style.minHeight = '26px';
+        return;
+      }
+      stats.forEach(({type, n}) => {
+        const w = Math.round(100 * n / total);
+        if (w <= 0) return;
+        const seg = document.createElement('div');
+        seg.className = 'seg';
+        seg.style.width = `${w}%`;
+        seg.style.background = TYPE_COLOR[type] || '#9ca3af';
+        seg.textContent = `${type} (${n})`;
+        el.appendChild(seg);
+      });
+    }
+
+    let clipSeq = 0;
+    function renderBoard(type, items, color){
+      const base = TYPE_COLOR[type] || '#6b7280';
+      const BOARD_WIDTH = 150; /* fixed card width */
+      const computed = MARGIN.left + CELL_W + COUNT_W + MARGIN.right;
+      const innerWidth = Math.min(BOARD_WIDTH, Math.max(BOARD_WIDTH, computed)); // keep SVG <= card width
+
+      const board = document.createElement('div');
+      board.className = 'board';
+      board.style.backgroundColor = hexToRGBA(base, 0.08);
+      board.style.width = BOARD_WIDTH + 'px';
+      board.style.flex = '0 0 auto';
+
+      const h = document.createElement('div');
+      h.className = 'board-title';
+      h.style.color = base;
+      h.textContent = `${type} (${items.length})`;
+      board.appendChild(h);
+
+      const height = MARGIN.top + MARGIN.bottom + (items.length + EXTRA_ROWS) * ROW_H + 8;
+      const svg = d3.create('svg')
+        .attr('width', innerWidth)
+        .attr('height', height)
+        .attr('style','max-width:100%;height:auto;font:10px system-ui, -apple-system, Segoe UI, Roboto, Arial;');
+      board.appendChild(svg.node());
+
+      // author label
+      svg.append('text')
+        .attr('x', MARGIN.left + CELL_W/2)
+        .attr('y', 14)
+        .attr('text-anchor','middle')
+        .attr('font-weight',700)
+        .attr('font-size','10px')
+        .attr('fill','var(--blue)')
+        .text(authorNameFull);
+
+      // heat column frame
+      svg.append('rect')
+        .attr('x', MARGIN.left - 0.5)
+        .attr('y', MARGIN.top - 0.5)
+        .attr('width', CELL_W + 1)
+        .attr('height', height - MARGIN.top - MARGIN.bottom + 1)
+        .attr('fill','none')
+        .attr('stroke','#e5e7eb');
+
+      // clip long labels
+      const clipId = `clip-${++clipSeq}`;
+      svg.append('clipPath').attr('id', clipId)
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', MARGIN.top - 2)
+        .attr('width', MARGIN.left - 6)
+        .attr('height', height - MARGIN.top - MARGIN.bottom + 12);
+
+      const labelsG = svg.append('g').attr('clip-path', `url(#${clipId})`);
+
+      let y = MARGIN.top;
+      items.forEach(item => {
+        labelsG.append('text')
+          .attr('x', MARGIN.left - 6)
+          .attr('y', y + ROW_H/2)
+          .attr('dy', '0.35em')
+          .attr('text-anchor','end')
+          .attr('dominant-baseline','middle')
+          .text(truncate(item.name, 12))
+          .append('title').text(item.name);
+
+        const val = item.shared;
+        svg.append('rect')
+          .attr('x', MARGIN.left).attr('y', y + 3)
+          .attr('width', CELL_W).attr('height', ROW_H - 8)
+          .attr('rx', 3).attr('ry', 3)
+          .attr('fill', val === 0 ? '#eef2ff' : color(val))
+          .attr('stroke','#e5e7eb')
+          .on('mousemove', (ev) => {
+            tip.style.opacity = 1;
+            tip.textContent = `${item.name} • ${val} publication${val===1?'':'s'} • ${type}`;
+            tip.style.left = ev.clientX + 'px';
+            tip.style.top = ev.clientY + 'px';
+          })
+          .on('mouseleave', () => tip.style.opacity = 0);
+
+        svg.append('text')
+          .attr('x', MARGIN.left + CELL_W + 4)
+          .attr('y', y + ROW_H/2)
+          .attr('dy', '0.35em')
+          .attr('text-anchor','start')
+          .attr('dominant-baseline','middle')
+          .attr('font-weight',700)
+          .attr('font-size','10px')
+          .text(val);
+
+        svg.append('line')
+          .attr('x1', 0).attr('y1', y + ROW_H + 2)
+          .attr('x2', innerWidth).attr('y2', y + ROW_H + 2)
+          .attr('stroke','#f1f5f9');
+
+        y += ROW_H;
+      });
+
+      boardsEl.appendChild(board);
+    }
+
+    function truncate(s, n){
+      s = s || '';
+      return s.length > n ? s.slice(0, n-1) + '…' : s;
+    }
+  </script>
+</body>
+</html>

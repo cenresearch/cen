@@ -1,0 +1,233 @@
+[
+  {
+    "cluster_id": 1,
+    "theme_id": 1,
+    "name": "Robotics and Intelligent Autonomous Systems",
+    "description": "Areas related to robotics, drones (UAVs), and autonomous systems, including sensors, robot control, and reinforcement learning. Examples include autonomous delivery drones, robotic manipulators for manufacturing, and reinforcement learning for path planning.",
+    "code": "C1-T1"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 2,
+    "name": "ICT and IoT",
+    "description": "ICT covers communication systems, devices, and applications for learning environments. IoT involves designing and connecting devices to make them smart and autonomous. Examples include smart home systems, connected medical devices, and classroom IoT platforms.",
+    "code": "C1-T2"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 3,
+    "name": "Semiconductors and Integrated Circuit Design",
+    "description": "Includes the design of miniaturized and integrated electronic systems on chip, smart sensors, flexible electronics, nano carbon tubes, and semiconductor modeling. Examples include low-power chipsets for wearables, CNT-based transistors, and flexible biosensors.",
+    "code": "C1-T3"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 4,
+    "name": "Cyber Systems, Infrastructure, Platforms",
+    "description": "Focuses on infrastructure service provisioning, such as cyber-physical systems, cybersecurity, cloud, networking, and specialized platforms like GPUs. Examples include secure IoT platforms, cloud-native applications, and GPU clusters for AI training.",
+    "code": "C1-T4"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 5,
+    "name": "Mechatronics and Control",
+    "description": "Involves hardware-in-loop control of physical systems using embedded controllers integrated with network services. Examples include automotive engine control units, smart robotic arms, and remote-controlled mechatronic testbeds.",
+    "code": "C1-T5"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 6,
+    "name": "Intelligent Civil Infrastructure",
+    "description": "Intelligent (sustainable, resilient, and smart) evaluation, operation, and maintenance of civil infrastructure, including buildings, roads, traffic systems, pipelines, dams, and waste management. Examples include smart traffic lights, AI-based structural monitoring of bridges, and predictive maintenance for pipelines.",
+    "code": "C1-T6"
+  },
+  {
+    "cluster_id": 1,
+    "theme_id": 7,
+    "name": "Radar Technologies and Remote Sensing",
+    "description": "Design and implementation of advanced radar systems for drone detection and imaging for airport security. Examples include passive radar systems, drone jamming tools, and real-time imaging for perimeter protection.",
+    "code": "C1-T7"
+  },
+  {
+    "cluster_id": 2,
+    "theme_id": 1,
+    "name": "Biosensors, Implantable Devices and Bioprocesses",
+    "description": "Development of flexible biosensing materials and implantable wireless devices for medical monitoring and diagnosis. Examples include glucose monitoring patches, implantable cardiac sensors, and neural recording electrodes.",
+    "code": "C2-T1"
+  },
+  {
+    "cluster_id": 2,
+    "theme_id": 2,
+    "name": "Drug Delivery, Microfluidics and Lab on a Chip",
+    "description": "Metal organic networks, micelles, liposomes, targeted delivery, ultrasound, light, microwave power, Nanoparticle synthesis, mechanobiology, digital microfluidics. Systems for controlled drug release, nanoparticle delivery, and lab-on-chip diagnostics. Examples include liposome-based drug carriers, microfluidic cancer diagnostics, and ultrasound-triggered delivery capsules.",
+    "code": "C2-T2"
+  },
+  {
+    "cluster_id": 2,
+    "theme_id": 3,
+    "name": "Medical Imaging and Bio-Informatics",
+    "description": "Medical image processing including MRI image analysis, CT scan reconstruction, ultrasound imaging techniques, X-ray image enhancement, medical image segmentation, 3D medical visualization, DICOM image handling, bioinformatics algorithms for genomic data, protein structure prediction, DNA sequence analysis, computational biology modeling, electronic health records systems, and healthcare data analytics for clinical decision support.",
+    "code": "C2-T3"
+  },
+  {
+    "cluster_id": 2,
+    "theme_id": 4,
+    "name": "Neuroengineering",
+    "description": "Areas include mental stress management, cognitive vigilance assessment and enhancement, emotions monitoring, flexible implantable electrodes in peripheral nerve injury, cortical source imaging in epilepsy and severity assessment of spinal cord injuryEngineering approaches for studying and interfacing with the nervous system. Examples include brain–computer interfaces, deep brain stimulation devices, and cortical mapping in epilepsy.",
+    "code": "C2-T4"
+  },
+  {
+    "cluster_id": 2,
+    "theme_id": 5,
+    "name": "Healthcare Accreditation and Quality Improvement",
+    "description": "This theme focuses on the challenges and strategies related to healthcare accreditation models and their impact on quality improvement in healthcare organizations.",
+    "code": null
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 1,
+    "name": "Polymers and Composite Materials",
+    "description": "Materials for Energy applications, Flexible bioelectrode/biosensing materials, Data-Driven Design of Materials, Metal-organic frameworks, micro-beam sensors, Shape memory polymers, Composite materials design and manufacturing Development of advanced polymers and composites for energy and structural applications. Examples include carbon fiber composites for aerospace, biodegradable polymers, and shape-memory polymers.",
+    "code": "C3-T1"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 2,
+    "name": "Experimental and Computational Mechanics",
+    "description": "Solid mechanics, fluid mechanics, material characterization, computational mechanics, fluid structure interaction, and soil mechanics. Study of materials and systems under mechanical loading using experiments and simulations. Examples include fluid–structure interaction models, soil mechanics tests, and crash simulations.",
+    "code": "C3-T2"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 3,
+    "name": "Quality and Non-Destructive Evaluation",
+    "description": "Metrology, nondestructive evaluation, Structural health monitoring, and microwave imaging. Examples include ultrasonic testing of welds, microwave imaging for defects, and structural health monitoring sensors.",
+    "code": "C3-T3"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 4,
+    "name": "Smart and Sustainable Manufacturing",
+    "description": "Advanced material processing, sustainable manufacturing. Examples include precision machining with low energy use, zero-waste manufacturing lines, and recycling-oriented processes.",
+    "code": "C3-T4"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 5,
+    "name": "Advanced and Functional Materials",
+    "description": "High entropy alloys, Shape memory polymers, Shape memory alloys, nanomaterials, Piezoelectric materials, cellular and meta materials, biocompatible materials. Development of high-performance materials with specific properties. Examples include piezoelectric sensors, high-entropy alloys, and biocompatible implants.",
+    "code": "C3-T5"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 6,
+    "name": "Additive Manufacturing",
+    "description": "3D and 4D printing, metal and polymer 3D printing. High entropy alloys, Shape memory polymers, Shape memory alloys, nanomaterials, Piezoelectric materials, cellular and meta materials, biocompatible materials. Use of 3D and 4D printing for customized parts. Examples include metal 3D printing for aerospace parts, 4D-printed smart materials, and patient-specific biomedical implants.",
+    "code": "C3-T6"
+  },
+  {
+    "cluster_id": 3,
+    "theme_id": 7,
+    "name": "Structures and Structural Materials",
+    "description": "Construction materials, concrete, structural strengthening. Design and testing of construction materials and structural systems. Examples include high-strength concrete, fiber-reinforced composites, and retrofitted bridges.",
+    "code": "C3-T7"
+  },
+  {
+    "cluster_id": 4,
+    "theme_id": 1,
+    "name": "AI Applications",
+    "description": "Applied artificial intelligence including computer vision for object detection and recognition, image classification, facial recognition systems, natural language processing applications, expert systems for decision support, AI in medical diagnosis, educational AI and e-learning systems, AI for predictive maintenance in manufacturing, intelligent automation in industrial processes, AI-powered quality control, chatbots and virtual assistants, recommendation systems, and domain-specific AI solutions addressing real-world engineering and business problems.",
+    "code": "C4-T1"
+  },
+  {
+    "cluster_id": 4,
+    "theme_id": 2,
+    "name": "Machine Learning Techniques",
+    "description": "Machine learning algorithms and methodologies including supervised learning (regression, classification), unsupervised learning (clustering, dimensionality reduction), reinforcement learning, deep learning architectures (CNNs, RNNs, Transformers), neural network design and optimization, support vector machines, decision trees, ensemble methods, data preprocessing and feature engineering, model validation and evaluation, hyperparameter optimization, and algorithm development for pattern recognition and intelligent data analysis.",
+    "code": "C4-T2"
+  },
+  {
+    "cluster_id": 4,
+    "theme_id": 3,
+    "name": "Digital Transformation in Education",
+    "description": "This theme examines the role of digital transformation in enhancing sustainability and inclusivity within higher education through blended learning models.",
+    "code": null
+  },
+  {
+    "cluster_id": 5,
+    "theme_id": 1,
+    "name": "Sustainable Supply Chain Systems",
+    "description": "Includes green supply chain, green logistics, closed-loop, Carbon emissions, Cold Supply Chain. Green and sustainable approaches to supply chains. Examples include closed-loop recycling systems, carbon-neutral logistics, and cold chain for food and pharmaceuticals.",
+    "code": "C5-T1"
+  },
+  {
+    "cluster_id": 5,
+    "theme_id": 2,
+    "name": "Operations and Logistics Planning",
+    "description": "Includes Inventory Management, warehousing, routing, distribution. Optimization of supply chain operations. Examples include warehouse layout optimization, last-mile delivery routing, and inventory demand forecasting.",
+    "code": "C5-T2"
+  },
+  {
+    "cluster_id": 5,
+    "theme_id": 3,
+    "name": "Smart Logistic Systems",
+    "description": " Includes the use of emerging technologies such as drones, Blockchain, IoT, Industry 4.0. Integration of digital technologies in logistics. Examples include blockchain-based shipment tracking, drone delivery, and IoT-enabled fleet monitoring.",
+    "code": "C5-T3"
+  },
+  {
+    "cluster_id": 5,
+    "theme_id": 4,
+    "name": "Sustainable Business Practices in Fashion",
+    "description": "This theme explores sustainable business models and strategies for startups in the fashion industry, focusing on local engagement and environmental impacts.",
+    "code": null
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 1,
+    "name": "Water and Wastewater Treatment",
+    "description": "Different treatment and separation technologies for removing pollutants, Membranes, Computational Fluid Dynamics, Desalination, and water distribution system . Technologies for water purification and treatment. Examples include desalination plants, membrane bioreactors, and pollutant removal with nanomaterials.",
+    "code": "C6-T1"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 2,
+    "name": "Renewable Energy and Power Systems",
+    "description": "Hydrogen production and storage, Polymeric Materials for Energy Applications, Bioenergy, Process Design, Power, Renewable Energy, Energy Harvesting, Electric Vehicles, Energy Conversion. Development of renewable energy sources and conversion systems. Examples include hydrogen fuel cells, solar PV systems, and wind energy farms.",
+    "code": "C6-T2"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 3,
+    "name": "Sustainability of Environmental and Chemical Processes",
+    "description": "Sustainability of waste management and air pollution, Corrosion inhibition, Ionic Liquids, Metal-organic frameworks in carbon capture, Ionic Liquids in Separations, Edible Films and Coatings. Methods to improve sustainability in industrial and chemical processes. Examples include carbon capture with MOFs, green corrosion inhibitors, and waste-to-energy systems.",
+    "code": "C6-T3"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 4,
+    "name": "Sustainable Construction Management",
+    "description": "Management of sustainable construction processes involving different types of infrastructures.. Practices for sustainable infrastructure development. Examples include green building certification, use of recycled construction materials, and life-cycle cost analysis.",
+    "code": "C6-T4"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 5,
+    "name": "Environmental Hydraulics and Hydrology",
+    "description": "Fluid flow, Hydraulics and water quality modeling and contaminant hydrology studies . Study of water movement and quality in natural and urban systems. Examples include coastal flood modeling, groundwater contamination studies, and hydrodynamic simulations of lagoons.",
+    "code": "C6-T5"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 6,
+    "name": "Smart Grid",
+    "description": "smart energy networks, smart protection systems, distributed energy resources, smart grid communications, microgrids, demand response, Advanced Metering Infrastructure, cyber-physical systems, multi-energy systems, transactive energy, and data analytics. Research on advanced energy networks and control. Examples include demand response systems, microgrids for rural areas, and AI-driven fault detection in smart grids.",
+    "code": "C6-T6"
+  },
+  {
+    "cluster_id": 6,
+    "theme_id": 7,
+    "name": "Thermofluids and Combustion",
+    "description": "Heat and mass transfer analysis, combustion processes and optimization, thermal system design for power plants and HVAC, fluid mechanics including turbulent flow analysis, energy conversion systems, thermal management in electronics, heat exchanger design, thermodynamic cycle analysis, refrigeration and air conditioning systems, computational fluid dynamics (CFD) for thermal applications, and thermal engineering applications in energy systems, manufacturing, and environmental control.",
+    "code": "C6-T7"
+  }
+]
