@@ -34,6 +34,20 @@
     .publication-meta { font-size: 9px; color: #666; }
     .cluster-theme-info { font-size: 9px; color: #007acc; margin-top: 2px; font-weight: bold; }
 
+    /* Style for publication count links */
+    .pub-count { 
+      color: #dc2626; 
+      font-weight: bold; 
+      text-decoration: underline; 
+      cursor: pointer; 
+      font-size: 16px;
+      margin-left: 8px;
+    }
+    .pub-count:hover { 
+      color: #b91c1c; 
+      text-decoration: none; 
+    }
+
     svg { width: 100%; height: auto; display:block; }
   </style>
 </head>
@@ -52,6 +66,10 @@
   </div>
 
   <h1>Clusters - Publications: 1/1/2022 - 15/8/2025 <span style="color:#e11d48; font-size:12px;">click on author names for details</span></h1>
+  
+  <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px; font-size: 14px; color: #0c4a6e;">
+    <strong>Note:</strong> The red numbers in parentheses (N) next to each Cluster and Theme name show the total number of publications classified to that category. Click on these numbers to view all publications in that cluster or theme.
+  </div>
 
   <script>
     (function () {
@@ -189,6 +207,65 @@
       popupOverlay.style.display = 'block';
     }
 
+    // New function to show cluster/theme publications
+    function showClusterThemePublications(data, type) {
+      const popupTitle = document.getElementById('popupTitle');
+      const popupBody = document.getElementById('popupBody');
+      const popupOverlay = document.getElementById('popupOverlay');
+
+      const count = data.publication_count || 0;
+      const publications = data.all_publications || [];
+      
+      popupTitle.textContent = `${type === 'cluster' ? 'Cluster' : 'Theme'}: ${data.name} - ${count} Publications`;
+
+      if (publications.length === 0) {
+        popupBody.innerHTML = `
+          <div style="color: #666; font-size: 11px;">
+            <strong>${type === 'cluster' ? 'Cluster' : 'Theme'}:</strong> ${data.name}<br>
+            <strong>Total publications:</strong> ${count}<br><br>
+            <div style="color: #ff6b35;">No publication details available.</div>
+          </div>`;
+        popupOverlay.style.display = 'block';
+        return;
+      }
+
+      // Group publications by year
+      const pubsByYear = {};
+      publications.forEach(pub => {
+        const year = pub.year || 'Unknown';
+        if (!pubsByYear[year]) pubsByYear[year] = [];
+        pubsByYear[year].push(pub);
+      });
+
+      const sortedYears = Object.keys(pubsByYear).sort((a, b) => {
+        if (a === 'Unknown') return 1;
+        if (b === 'Unknown') return -1;
+        return parseInt(b) - parseInt(a);
+      });
+
+      let html = `<div style="margin-bottom: 8px; color: #666; font-size: 10px;">
+        <strong>${type === 'cluster' ? 'Cluster' : 'Theme'}:</strong> ${data.name}<br>
+        <strong>Total publications:</strong> ${publications.length}
+      </div>`;
+
+      sortedYears.forEach(year => {
+        html += `<div style="margin-bottom: 12px;">
+          <h4 class="publication-year">${year} (${pubsByYear[year].length})</h4>`;
+
+        pubsByYear[year].forEach(pub => {
+          html += `<div class="publication-item">
+            <div class="publication-title">${pub.title || 'Untitled'}</div>
+            <div class="publication-meta">ID: ${pub.scopus_id}</div>
+            <div class="cluster-theme-info">📂 Cluster ${pub.cluster_id} → Theme ${pub.theme_id}</div>
+          </div>`;
+        });
+        html += '</div>';
+      });
+
+      popupBody.innerHTML = html;
+      popupOverlay.style.display = 'block';
+    }
+
     function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
     document.getElementById('popupOverlay').addEventListener('click', function(e) { if (e.target === this) closePopup(); });
 
@@ -267,7 +344,8 @@ function openAuthorshipsPage(authorData){
       clusters.forEach((cluster) => {
         const clusterTreeData = {
           name: cluster.name, type: 'cluster', id: cluster.id, cluster_id: cluster.id,
-          children: cluster.children || []
+          children: cluster.children || [], publication_count: cluster.publication_count,
+          all_publications: cluster.all_publications
         };
 
         const root = d3.hierarchy(clusterTreeData);
@@ -340,6 +418,7 @@ function openAuthorshipsPage(authorData){
           })
           .attr("stroke", "white");
 
+        // Create text labels for cluster/theme names
         const labels = node.append("text")
           .attr("dy", "0.31em")
           .attr("x", d => (d.data.type === 'cluster' ? 15 : (d.data.type === 'theme' ? 12 : 20)))
@@ -361,6 +440,45 @@ function openAuthorshipsPage(authorData){
             const currentText = text.text();
             if (currentText.length > maxLength) text.text(currentText.substring(0, maxLength) + "...");
           });
+
+        // Add publication count links for clusters and themes - added after text rendering
+        setTimeout(() => {
+          node.filter(d => d.data.type === 'cluster' || d.data.type === 'theme')
+            .each(function(d) {
+              const nodeGroup = d3.select(this);
+              const publicationCount = d.data.publication_count || 0;
+              
+              if (publicationCount > 0) {
+                // Get the actual rendered text width
+                const textElement = nodeGroup.select('text').node();
+                const textWidth = textElement ? textElement.getBBox().width : 0;
+                const baseX = d.data.type === 'cluster' ? 15 : 12;
+                const xOffset = baseX + textWidth + 10;
+                
+                nodeGroup.append("text")
+                  .text(`(${publicationCount})`)
+                  .attr("x", xOffset)
+                  .attr("y", 0)
+                  .attr("dy", "0.31em")
+                  .attr("class", "pub-count")
+                  .style("font-size", d.data.type === 'cluster' ? "20px" : "16px")
+                  .style("font-weight", "bold")
+                  .style("fill", "#dc2626")
+                  .style("text-decoration", "underline")
+                  .style("cursor", "pointer")
+                  .on("click", function(ev) {
+                    ev.stopPropagation();
+                    showClusterThemePublications(d.data, d.data.type);
+                  })
+                  .on("mouseover", function() {
+                    d3.select(this).style("fill", "#b91c1c").style("text-decoration", "none");
+                  })
+                  .on("mouseout", function() {
+                    d3.select(this).style("fill", "#dc2626").style("text-decoration", "underline");
+                  });
+              }
+            });
+        }, 100);
 
         // right-side icon for Collab
         const iconLayer = svg.append("g");
