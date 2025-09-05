@@ -22,7 +22,21 @@
     .controls select, .controls input { margin-left: 8px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 16px; }
 
     .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; }
-    .popup-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; padding: 15px; max-width: 70%; max-height: 85%; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1001; font-size: 11px; }
+    .popup-content {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      width: 92%;
+      max-width: 92%;
+      max-height: 92%;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 1001;
+      font-size: 11px;
+    }
     .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
     .popup-title { font-size: 14px; font-weight: bold; color: #333; }
     .popup-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; }
@@ -34,19 +48,29 @@
     .publication-meta { font-size: 9px; color: #666; }
     .cluster-theme-info { font-size: 9px; color: #007acc; margin-top: 2px; font-weight: bold; }
 
-    /* Style for publication count links */
-    .pub-count { 
-      color: #dc2626; 
-      font-weight: bold; 
-      text-decoration: underline; 
-      cursor: pointer; 
-      font-size: 16px;
-      margin-left: 8px;
-    }
-    .pub-count:hover { 
-      color: #b91c1c; 
-      text-decoration: none; 
-    }
+    .pub-count { color: #dc2626; font-weight: bold; text-decoration: underline; cursor: pointer; font-size: 10px; margin-left: 8px; }
+    .pub-count:hover { color: #b91c1c; text-decoration: none; }
+    .dyn-pubs { fill: #334155; font-weight: 600; }
+    .dyn-auths { fill: #1d4ed8; font-weight: 600; }
+
+    /* bigger counts next to names */
+    .pub-count { font-size: 20px !important; }
+    .dyn-pubs { font-size: 20px !important; }
+    .dyn-auths { font-size: 20px !important; }
+
+    /* compact matrix */
+    table.matrix { table-layout: fixed; border-collapse: collapse; font-size: 11px; width: 100%; }
+    table.matrix th, table.matrix td { border:1px solid #e5e7eb; padding:2px 3px; }
+    table.matrix td { width: 28px; min-width: 28px; max-width: 28px; height: 22px; line-height: 1.0; text-align: center; }
+    table.matrix th { background:#f9fafb; text-align:left; position:sticky; top:0; white-space:nowrap; font-size: 11px; } /* smaller names */
+    table.matrix td.self { font-weight:700; }
+    table.matrix td.zero { color:#6b7280; }
+	table.matrix thead th {
+	  white-space: normal;   /* allow wrapping */
+	  line-height: 1.1;      /* tighter lines */
+	  text-align: center;    /* optional */
+	}
+    .matrix-caption { margin:6px 0 10px 0; color:#334155; font-size:12px; }
 
     svg { width: 100%; height: auto; display:block; }
   </style>
@@ -60,16 +84,29 @@
     <a href="classification.html">Classification</a>
     <a href="authors.html">Authors</a>
     <a href="authors_clusters.html">Authors-Clusters</a>
-	<a href="cen_collab.html">Collaborations</a>
-	<a href="metrics.html">Metrics</a>
+    <a href="cen_collab.html">Collaborations</a>
+    <a href="metrics.html">Metrics</a>
     <a href="process.html">Process Diagram</a>
   </div>
 
   <h1>Clusters - Publications: 1/1/2022 - 15/8/2025 <span style="color:#e11d48; font-size:12px;">click on author names for details</span></h1>
   
-  <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px; font-size: 14px; color: #0c4a6e;">
-    <strong>Note:</strong> The red numbers in parentheses (N) next to each Cluster and Theme name show the total number of UNIQUE publications classified to that category. Click on these numbers to view all publications in that cluster or theme.
-  </div>
+
+  
+ <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px; font-size: 16px;">
+    <div style="color: #dc2626; margin-bottom: 8px;">
+      <strong>Red (N)</strong> = total unique publications in data.
+    </div>
+    <div style="color: #000000; margin-bottom: 8px;">
+      <strong>Gray [P:x]</strong> = unique publications for visible authors after Min Papers filter.
+    </div>
+    <div style="color: #0000FF; margin-bottom: 8px;">
+      <strong>Blue {A:y}</strong> = count of visible authors.
+    </div>
+	<div style="color: #0ea5e9;">
+      <strong>[matrix] </strong> = pairwise shared counts.
+    </div>
+</div>
 
   <script>
     (function () {
@@ -84,20 +121,19 @@
 
   <div class="controls">
     <label>
-      Layout:
+      Layout
       <select id="layoutSelect">
         <option value="tree">Tree (Left-to-Right)</option>
         <option value="cluster">Cluster</option>
       </select>
     </label>
     <label>
-      Min Papers:
+      Min Papers
       <input type="number" id="minPapers" value="1" min="1" max="50">
     </label>
     <button onclick="updateVisualization()">Update</button>
   </div>
 
-  <!-- Publications popup -->
   <div class="popup-overlay" id="popupOverlay">
     <div class="popup-content">
       <div class="popup-header">
@@ -115,8 +151,8 @@
     let rawData = null;
     let currentLayout = 'tree';
     let minPapers = 1;
-	const LINK_PAD = 30;   // push links this many pixels to the right of the name
-	const LINK_GAP = 14;   // space between the two links
+    const LINK_PAD = 30;
+    const LINK_GAP = 14;
 
     function showAuthorPublications(authorData) {
       const popupTitle = document.getElementById('popupTitle');
@@ -207,7 +243,6 @@
       popupOverlay.style.display = 'block';
     }
 
-    // New function to show cluster/theme publications
     function showClusterThemePublications(data, type) {
       const popupTitle = document.getElementById('popupTitle');
       const popupBody = document.getElementById('popupBody');
@@ -229,7 +264,6 @@
         return;
       }
 
-      // Group publications by year
       const pubsByYear = {};
       publications.forEach(pub => {
         const year = pub.year || 'Unknown';
@@ -269,23 +303,21 @@
     function closePopup() { document.getElementById('popupOverlay').style.display = 'none'; }
     document.getElementById('popupOverlay').addEventListener('click', function(e) { if (e.target === this) closePopup(); });
 
-// collab now goes to authorships
-function openCollabPage(authorData){
-  const aid = authorData.author_id || (String(authorData.id||'').match(/author_(\d+)_/)||[])[1];
-  const total = authorData.value || (authorData.all_publications ? authorData.all_publications.length : '');
-  const name = encodeURIComponent(authorData.name || '');
-  const url = `authorships.html?aid=${encodeURIComponent(aid)}&name=${name}&total=${encodeURIComponent(total)}`;
-  window.location.href = url;
-}
+    function openCollabPage(authorData){
+      const aid = authorData.author_id || (String(authorData.id||'').match(/author_(\d+)_/)||[])[1];
+      const total = authorData.value || (authorData.all_publications ? authorData.all_publications.length : '');
+      const name = encodeURIComponent(authorData.name || '');
+      const url = `authorships.html?aid=${encodeURIComponent(aid)}&name=${name}&total=${encodeURIComponent(total)}`;
+      window.location.href = url;
+    }
 
-// authorships now goes to collab
-function openAuthorshipsPage(authorData){
-  const aid = authorData.author_id || (String(authorData.id||'').match(/author_(\d+)_/)||[])[1];
-  const total = authorData.value || (authorData.all_publications ? authorData.all_publications.length : '');
-  const name = encodeURIComponent(authorData.name || '');
-  const url = `collab.html?aid=${encodeURIComponent(aid)}&name=${name}&total=${encodeURIComponent(total)}`;
-  window.location.href = url;
-}
+    function openAuthorshipsPage(authorData){
+      const aid = authorData.author_id || (String(authorData.id||'').match(/author_(\d+)_/)||[])[1];
+      const total = authorData.value || (authorData.all_publications ? authorData.all_publications.length : '');
+      const name = encodeURIComponent(authorData.name || '');
+      const url = `collab.html?aid=${encodeURIComponent(aid)}&name=${name}&total=${encodeURIComponent(total)}`;
+      window.location.href = url;
+    }
 
     const timestamp = Date.now();
     fetch(`./clusters.json?v=${timestamp}`)
@@ -327,6 +359,188 @@ function openAuthorshipsPage(authorData){
         return cluster;
       }).filter(cluster => cluster.children.length > 0);
       return filtered;
+    }
+
+    /* dynamic metrics for visible authors: unique pubs and visible authors */
+    function computeDynamicMetricsForCluster(cluster){
+      const themes = new Map();
+      const clusterPubSet = new Set();
+      const clusterAuthorSet = new Set();
+
+      (cluster.children || []).forEach(theme => {
+        const themePubSet = new Set();
+        const themeAuthors = theme.children || [];
+
+        themeAuthors.forEach(author => {
+          const aid = author.author_id || author.id;
+          if (aid != null) clusterAuthorSet.add(String(aid));
+
+          const pubs = Array.isArray(author.theme_publications)
+            ? author.theme_publications
+            : (author.all_publications || []);
+
+          pubs.forEach(p => {
+            if (!p) return;
+            const inThis = Number(p.cluster_id) === Number(cluster.id) &&
+                           Number(p.theme_id) === Number(theme.id);
+            if (inThis && p.scopus_id != null) themePubSet.add(String(p.scopus_id));
+          });
+        });
+
+        themePubSet.forEach(id => clusterPubSet.add(id));
+        themes.set(theme.id, { pubs: themePubSet.size, authors: themeAuthors.length });
+      });
+
+      return { cluster: { pubs: clusterPubSet.size, authors: clusterAuthorSet.size }, themes };
+    }
+
+    function authorSet(author, scope){
+      const aid = author.author_id || author.id;
+      let pubs = Array.isArray(author.theme_publications)
+        ? author.theme_publications
+        : (author.all_publications || []);
+      const set = new Set();
+      const arr = [];
+      pubs.forEach(p => {
+        if (!p || p.scopus_id == null) return;
+        if (scope.filter(p)) {
+          const sid = String(p.scopus_id);
+          if (!set.has(sid)) { set.add(sid); arr.push(p); }
+        }
+      });
+      return { aid: String(aid ?? Math.random()), name: author.name || 'Unknown', set, pubs: arr };
+    }
+
+    function computeOverlapForTheme(theme, clusterId){
+      const pubInfo = new Map();
+      const authors = (theme.children || []).map(a => authorSet(a, {
+        filter: (p) => Number(p.cluster_id) === Number(clusterId) && Number(p.theme_id) === Number(theme.id)
+      }));
+      authors.forEach(a => a.pubs.forEach(p => {
+        const sid = String(p.scopus_id);
+        if (!pubInfo.has(sid)) pubInfo.set(sid, { title: p.title || '', year: p.year || '' });
+      }));
+      return { authors, pubInfo };
+    }
+
+    function computeOverlapForCluster(cluster){
+      const tmp = new Map();
+      const pubInfo = new Map();
+      (cluster.children || []).forEach(theme => {
+        (theme.children || []).forEach(author => {
+          const rec = authorSet(author, { filter: (p) => Number(p.cluster_id) === Number(cluster.id) });
+          if (!tmp.has(rec.aid)) tmp.set(rec.aid, { aid: rec.aid, name: rec.name, set: new Set(), pubs: [] });
+          const dest = tmp.get(rec.aid);
+          rec.pubs.forEach(p => {
+            const sid = String(p.scopus_id);
+            if (!dest.set.has(sid)) { dest.set.add(sid); dest.pubs.push(p); }
+            if (!pubInfo.has(sid)) pubInfo.set(sid, { title: p.title || '', year: p.year || '' });
+          });
+        });
+      });
+      return { authors: Array.from(tmp.values()), pubInfo };
+    }
+
+    function makeMatrix(authors){
+      const n = authors.length;
+      const counts = Array.from({length:n}, () => Array(n).fill(0));
+      const ids = Array.from({length:n}, () => Array(n).fill(null));
+      for (let i=0;i<n;i++){
+        for (let j=0;j<n;j++){
+          if (i===j){
+            counts[i][j] = authors[i].set.size;
+            ids[i][j] = Array.from(authors[i].set);
+          } else {
+            const inter = [];
+            authors[i].set.forEach(sid => { if (authors[j].set.has(sid)) inter.push(sid); });
+            counts[i][j] = inter.length;
+            ids[i][j] = inter;
+          }
+        }
+      }
+      return { counts, ids };
+    }
+
+    function colorForCount(c, maxC){
+      if (!maxC || c <= 0) return '#ffffff';        // zero stays white
+      const t = c / maxC;                            // 0..1
+      const alpha = 0.15 + 0.75 * t;                 // 0.15..0.90
+      return `rgba(2,132,199, ${alpha.toFixed(3)})`; // blue with variable alpha
+    }
+
+    function showOverlapMatrix(nodeData, nodeType, clusterCtx){
+      const popupTitle = document.getElementById('popupTitle');
+      const popupBody  = document.getElementById('popupBody');
+      const popupOverlay = document.getElementById('popupOverlay');
+
+      const payload = nodeType === 'theme'
+        ? computeOverlapForTheme(nodeData, clusterCtx.id)
+        : computeOverlapForCluster(nodeData);
+
+      const authors = payload.authors.slice().sort((a,b)=>a.name.localeCompare(b.name));
+      const { counts, ids } = makeMatrix(authors);
+
+      const titleText = nodeType === 'theme'
+        ? `Shared publications — Theme ${(nodeData.name||'').replace(/^Theme \d+:\s*/,'')}`
+        : `Shared publications — Cluster ${nodeData.name}`;
+      popupTitle.textContent = titleText;
+
+      let html = '';
+      html += `<div class="matrix-caption">Authors shown ${authors.length}. Click a cell to list shared publications.</div>`;
+      html += '<div style="overflow:auto; max-height:70vh;">';
+      html += '<table class="matrix"><thead><tr><th></th>';
+      authors.forEach(a => { html += `<th title="${a.name}">${a.name}</th>`; });
+      html += '</tr></thead><tbody>';
+
+      for (let i=0;i<authors.length;i++){
+        html += `<tr><th title="${authors[i].name}">${authors[i].name}</th>`;
+        for (let j=0;j<authors.length;j++){
+          const c = counts[i][j];
+          const cls = (i===j) ? 'self' : (c===0 ? 'zero' : '');
+          html += `<td class="${cls}" data-i="${i}" data-j="${j}" style="cursor:pointer">${c}</td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</tbody></table></div>';
+      html += '<div id="matrixDetails" style="margin-top:10px; font-size:12px;"></div>';
+
+      popupBody.innerHTML = html;
+
+      // gradient coloring
+      let maxC = 0;
+      counts.forEach(row => row.forEach(v => { if (v > maxC) maxC = v; }));
+      popupBody.querySelectorAll('td[data-i]').forEach(td => {
+        const i = Number(td.getAttribute('data-i'));
+        const j = Number(td.getAttribute('data-j'));
+        const c = counts[i][j];
+        td.style.background = colorForCount(c, maxC);
+      });
+
+      // click to list shared
+      popupBody.querySelectorAll('td[data-i]').forEach(td => {
+        td.addEventListener('click', () => {
+          const i = Number(td.getAttribute('data-i'));
+          const j = Number(td.getAttribute('data-j'));
+          const list = ids[i][j] || [];
+          const detailsDiv = document.getElementById('matrixDetails');
+
+          if (list.length === 0){
+            detailsDiv.innerHTML = '<div class="matrix-caption">No shared publications.</div>';
+            return;
+          }
+
+          let out = `<div class="matrix-caption">Shared publications between <strong>${authors[i].name}</strong> and <strong>${authors[j].name}</strong> (${list.length})</div>`;
+          out += '<ul style="margin:6px 0 0 16px; padding:0;">';
+          list.forEach(sid => {
+            const info = payload.pubInfo.get(String(sid)) || {};
+            out += `<li style="margin:2px 0;">${sid} — ${info.title || ''} ${info.year ? '('+info.year+')' : ''}</li>`;
+          });
+          out += '</ul>';
+          detailsDiv.innerHTML = out;
+        });
+      });
+
+      popupOverlay.style.display = 'block';
     }
 
     function renderTreeVisualization() {
@@ -418,7 +632,6 @@ function openAuthorshipsPage(authorData){
           })
           .attr("stroke", "white");
 
-        // Create text labels for cluster/theme names
         const labels = node.append("text")
           .attr("dy", "0.31em")
           .attr("x", d => (d.data.type === 'cluster' ? 15 : (d.data.type === 'theme' ? 12 : 20)))
@@ -441,23 +654,23 @@ function openAuthorshipsPage(authorData){
             if (currentText.length > maxLength) text.text(currentText.substring(0, maxLength) + "...");
           });
 
-        // Add publication count links for clusters and themes - added after text rendering
         setTimeout(() => {
+          const dyn = computeDynamicMetricsForCluster(cluster);
+
           node.filter(d => d.data.type === 'cluster' || d.data.type === 'theme')
             .each(function(d) {
               const nodeGroup = d3.select(this);
               const publicationCount = d.data.publication_count || 0;
-              
+
+              const textElement = nodeGroup.select('text').node();
+              const textWidth = textElement ? textElement.getBBox().width : 0;
+              const baseX = d.data.type === 'cluster' ? 15 : 12;
+              let xPos = baseX + textWidth + 10;
+
               if (publicationCount > 0) {
-                // Get the actual rendered text width
-                const textElement = nodeGroup.select('text').node();
-                const textWidth = textElement ? textElement.getBBox().width : 0;
-                const baseX = d.data.type === 'cluster' ? 15 : 12;
-                const xOffset = baseX + textWidth + 10;
-                
-                nodeGroup.append("text")
+                const staticCount = nodeGroup.append("text")
                   .text(`(${publicationCount})`)
-                  .attr("x", xOffset)
+                  .attr("x", xPos)
                   .attr("y", 0)
                   .attr("dy", "0.31em")
                   .attr("class", "pub-count")
@@ -476,11 +689,57 @@ function openAuthorshipsPage(authorData){
                   .on("mouseout", function() {
                     d3.select(this).style("fill", "#dc2626").style("text-decoration", "underline");
                   });
+
+                xPos += (staticCount.node()?.getBBox()?.width || 0) + 6;
               }
+
+              const dynPubs = d.data.type === 'cluster'
+                ? dyn.cluster.pubs
+                : (dyn.themes.get(d.data.id)?.pubs || 0);
+
+              const dynPText = nodeGroup.append("text")
+                .text(`[P:${dynPubs}]`)
+                .attr("x", xPos)
+                .attr("y", 0)
+                .attr("dy", "0.31em")
+                .attr("class", "dyn-pubs")
+                .style("font-size", d.data.type === 'cluster' ? "16px" : "14px");
+              
+              xPos += (dynPText.node()?.getBBox()?.width || 0) + 6;
+
+              const dynAuths = d.data.type === 'cluster'
+                ? dyn.cluster.authors
+                : (dyn.themes.get(d.data.id)?.authors || 0);
+
+              const authText = nodeGroup.append("text")
+                .text(`{A:${dynAuths}}`)
+                .attr("x", xPos)
+                .attr("y", 0)
+                .attr("dy", "0.31em")
+                .attr("class", "dyn-auths")
+                .style("font-size", d.data.type === 'cluster' ? "16px" : "14px");
+
+              xPos += (authText.node()?.getBBox()?.width || 0) + 8;
+
+              nodeGroup.append("text")
+                .text("[matrix]")
+                .attr("x", xPos)
+                .attr("y", 0)
+                .attr("dy", "0.31em")
+                .style("font-size", d.data.type === 'cluster' ? "14px" : "13px")
+                .style("fill", "#0ea5e9")
+                .style("cursor", "pointer")
+                .on("click", function(ev){
+                  ev.stopPropagation();
+                  if (d.data.type === 'theme') {
+                    showOverlapMatrix(d.data, 'theme', cluster);
+                  } else {
+                    showOverlapMatrix(d.data, 'cluster');
+                  }
+                });
             });
         }, 100);
 
-        // right-side icon for Collab
         const iconLayer = svg.append("g");
         root.descendants()
           .filter(d => d.data.type === 'author')
@@ -502,15 +761,13 @@ function openAuthorshipsPage(authorData){
             iconGroup.append('path').attr('d', 'M-2,6 C3,2 13,2 18,6 L18,9 L-2,9 Z').attr('fill', blue);
           });
 
-        // [collab] link (existing) + new [authorships] link to its right
         node.filter(d => d.data.type === 'author')
           .each(function(d) {
             const nodeGroup = d3.select(this);
-
             const authorName = d.data.name || '';
             const truncatedName = authorName.length > 40 ? authorName.substring(0, 40) + "..." : authorName;
             const estimatedWidth = truncatedName.length * 9;
-			const collabX = 20 + estimatedWidth + LINK_PAD;
+            const collabX = 20 + estimatedWidth + LINK_PAD;
 
             const collabText = nodeGroup.append("text")
               .text("[collab]")
