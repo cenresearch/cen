@@ -101,7 +101,7 @@
       <strong>Gray [P:x]</strong> = unique publications for visible authors after Min Papers filter.
     </div>
     <div style="color: #0000FF; margin-bottom: 8px;">
-      <strong>Blue {A:y}</strong> = count of visible authors.
+      <strong>Blue {A:y}</strong> = count of unique visible authors.
     </div>
 	<div style="color: #0ea5e9;">
       <strong>[matrix] </strong> = pairwise shared counts.
@@ -584,7 +584,7 @@
         });
 
         const treeWidth = 2200;
-        const dx = 25;
+        const dx = 20;
         const tree = d3.tree().nodeSize([dx, treeWidth / (root.height + 1)]);
         tree(root);
 
@@ -640,7 +640,7 @@
           .attr("stroke-width", d => d.data.type === 'author' ? 3 : 4)
           .attr("paint-order", "stroke")
           .style("font-weight", d => (d.data.type === 'cluster' ? 700 : (d.data.type === 'theme' ? 600 : 400)))
-          .style("font-size", d => (d.data.type === 'cluster' ? "24px" : (d.data.type === 'theme' ? "18px" : "18px")))
+          .style("font-size", d => (d.data.type === 'cluster' ? "24px" : (d.data.type === 'theme' ? "20px" : "18px")))
           .style("fill", "black")
           .text(d => {
             if (d.data.type === 'cluster') return d.data.name;
@@ -653,92 +653,105 @@
             const currentText = text.text();
             if (currentText.length > maxLength) text.text(currentText.substring(0, maxLength) + "...");
           });
+		
+		setTimeout(() => {
+  const dyn = computeDynamicMetricsForCluster(cluster);
 
-        setTimeout(() => {
-          const dyn = computeDynamicMetricsForCluster(cluster);
+  node.filter(d => d.data.type === 'cluster' || d.data.type === 'theme')
+    .each(function(d) {
+      const nodeGroup = d3.select(this);
+      const publicationCount = d.data.publication_count || 0;
 
-          node.filter(d => d.data.type === 'cluster' || d.data.type === 'theme')
-            .each(function(d) {
-              const nodeGroup = d3.select(this);
-              const publicationCount = d.data.publication_count || 0;
+      // left align with the name
+      const baseX = d.data.type === 'cluster' ? 15 : 12;
 
-              const textElement = nodeGroup.select('text').node();
-              const textWidth = textElement ? textElement.getBBox().width : 0;
-              const baseX = d.data.type === 'cluster' ? 15 : 12;
-              let xPos = baseX + textWidth + 10;
+      // measure name height and add gap
+      const labelEl = nodeGroup.select('text').node();
+      const labelH  = labelEl ? labelEl.getBBox().height : (d.data.type === 'cluster' ? 24 : 18);
+      const gap = d.data.type === 'cluster'
+        ? (typeof METRIC_GAP_CLUSTER !== 'undefined' ? METRIC_GAP_CLUSTER : 8)
+        : (typeof METRIC_GAP_THEME   !== 'undefined' ? METRIC_GAP_THEME   : 0);
+      const baseY = labelH + gap;
 
-              if (publicationCount > 0) {
-                const staticCount = nodeGroup.append("text")
-                  .text(`(${publicationCount})`)
-                  .attr("x", xPos)
-                  .attr("y", 0)
-                  .attr("dy", "0.31em")
-                  .attr("class", "pub-count")
-                  .style("font-size", d.data.type === 'cluster' ? "20px" : "16px")
-                  .style("font-weight", "bold")
-                  .style("fill", "#dc2626")
-                  .style("text-decoration", "underline")
-                  .style("cursor", "pointer")
-                  .on("click", function(ev) {
-                    ev.stopPropagation();
-                    showClusterThemePublications(d.data, d.data.type);
-                  })
-                  .on("mouseover", function() {
-                    d3.select(this).style("fill", "#b91c1c").style("text-decoration", "none");
-                  })
-                  .on("mouseout", function() {
-                    d3.select(this).style("fill", "#dc2626").style("text-decoration", "underline");
-                  });
+      // row under the name
+      const row = nodeGroup.append("g")
+        .attr("transform", `translate(${baseX}, ${baseY})`);
 
-                xPos += (staticCount.node()?.getBBox()?.width || 0) + 6;
-              }
+      let xPos = 0;
 
-              const dynPubs = d.data.type === 'cluster'
-                ? dyn.cluster.pubs
-                : (dyn.themes.get(d.data.id)?.pubs || 0);
+      // red total (clickable)
+      if (publicationCount > 0) {
+        const red = row.append("text")
+          .text(`(${publicationCount})`)
+          .attr("x", xPos)
+          .attr("y", 0)
+          .attr("dy", "0.31em")
+          .attr("class", "pub-count")
+		  .style("fill", "#dc2626")
+          .style("cursor", "pointer")
+          .on("click", function(ev) {
+            ev.stopPropagation();
+            showClusterThemePublications(d.data, d.data.type);
+          })
+          .on("mouseover", function() {
+            d3.select(this).style("fill", "#b91c1c").style("text-decoration", "none");
+          })
+          .on("mouseout", function() {
+            d3.select(this).style("fill", "#dc2626").style("text-decoration", "underline");
+          });
 
-              const dynPText = nodeGroup.append("text")
-                .text(`[P:${dynPubs}]`)
-                .attr("x", xPos)
-                .attr("y", 0)
-                .attr("dy", "0.31em")
-                .attr("class", "dyn-pubs")
-                .style("font-size", d.data.type === 'cluster' ? "16px" : "14px");
-              
-              xPos += (dynPText.node()?.getBBox()?.width || 0) + 6;
+        xPos += (red.node()?.getBBox()?.width || 0) + 8;
+      }
 
-              const dynAuths = d.data.type === 'cluster'
-                ? dyn.cluster.authors
-                : (dyn.themes.get(d.data.id)?.authors || 0);
+      // gray [P:x]
+      const dynPubs = d.data.type === 'cluster'
+        ? dyn.cluster.pubs
+        : (dyn.themes.get(d.data.id)?.pubs || 0);
 
-              const authText = nodeGroup.append("text")
-                .text(`{A:${dynAuths}}`)
-                .attr("x", xPos)
-                .attr("y", 0)
-                .attr("dy", "0.31em")
-                .attr("class", "dyn-auths")
-                .style("font-size", d.data.type === 'cluster' ? "16px" : "14px");
+      const gray = row.append("text")
+        .text(`[P:${dynPubs}]`)
+        .attr("x", xPos)
+        .attr("y", 0)
+        .attr("dy", "0.31em")
+        .attr("class", "dyn-pubs");
 
-              xPos += (authText.node()?.getBBox()?.width || 0) + 8;
+      xPos += (gray.node()?.getBBox()?.width || 0) + 8;
 
-              nodeGroup.append("text")
-                .text("[matrix]")
-                .attr("x", xPos)
-                .attr("y", 0)
-                .attr("dy", "0.31em")
-                .style("font-size", d.data.type === 'cluster' ? "14px" : "13px")
-                .style("fill", "#0ea5e9")
-                .style("cursor", "pointer")
-                .on("click", function(ev){
-                  ev.stopPropagation();
-                  if (d.data.type === 'theme') {
-                    showOverlapMatrix(d.data, 'theme', cluster);
-                  } else {
-                    showOverlapMatrix(d.data, 'cluster');
-                  }
-                });
-            });
-        }, 100);
+      // blue {A:y}
+      const dynAuths = d.data.type === 'cluster'
+        ? dyn.cluster.authors
+        : (dyn.themes.get(d.data.id)?.authors || 0);
+
+      const blue = row.append("text")
+        .text(`{A:${dynAuths}}`)
+        .attr("x", xPos)
+        .attr("y", 0)
+        .attr("dy", "0.31em")
+        .attr("class", "dyn-auths");
+
+      xPos += (blue.node()?.getBBox()?.width || 0) + 10;
+
+      // [matrix] link
+      row.append("text")
+        .text("[matrix]")
+        .attr("x", xPos)
+        .attr("y", 0)
+        .attr("dy", "0.31em")
+        .style("font-size", d.data.type === 'cluster' ? "14px" : "13px")
+        .style("fill", "#0ea5e9")
+        .style("cursor", "pointer")
+        .on("click", function(ev){
+          ev.stopPropagation();
+          if (d.data.type === 'theme') {
+            showOverlapMatrix(d.data, 'theme', cluster);
+          } else {
+            showOverlapMatrix(d.data, 'cluster');
+          }
+        });
+    });
+}, 100);
+
+
 
         const iconLayer = svg.append("g");
         root.descendants()
