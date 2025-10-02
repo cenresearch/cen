@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AUS Research Clusters - Publication Embedder</title>
+
+  <style>
+    :root { --bg:#fff; --fg:#111; --muted:#6b7280; --border:#e5e7eb; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:var(--bg); color:var(--fg); }
+    .topnav { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); display: flex; gap: 16px; padding: 10px 16px; z-index: 2000; }
+    .topnav a { text-decoration: none; color: #111; font-size: 14px; font-weight: 500; }
+    .topnav a:hover { color: #007acc; }
+    .topnav a.active { background-color: #111; color: white; font-weight: bold; padding: 4px 10px; border-radius: 8px; }
+
+    .controls { padding: 14px; background: #f9fafb; border-bottom: 1px solid var(--border); }
+    .controls label { margin-right: 20px; font-size: 14px; }
+    .controls select, .controls input { margin-left: 8px; padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 16px; }
+    .controls button { padding: 6px 12px; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+    .controls button:hover { background: #005a9e; }
+
+    .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; }
+    .popup-content {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      width: 92%;
+      max-width: 92%;
+      max-height: 92%;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 1001;
+      font-size: 11px;
+    }
+    .popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+    .popup-title { font-size: 14px; font-weight: bold; color: #333; }
+    .popup-close { background: none; border: none; font-size: 20px; cursor: pointer; color: #666; }
+    .popup-close:hover { color: #000; }
+
+    .publication-item { margin-bottom: 8px; padding: 6px; border-left: 3px solid #007acc; background: #f9f9f9; }
+    .publication-year { font-weight: bold; color: #007acc; margin-bottom: 4px; font-size: 12px; }
+    .publication-title { font-size: 12px; line-height: 1.3; margin-bottom: 3px; }
+    .publication-meta { font-size: 9px; color: #666; }
+    .cluster-info { font-size: 9px; color: #007acc; margin-top: 2px; font-weight: bold; }
+
+    .pub-count { color: #dc2626; font-weight: bold; text-decoration: underline; cursor: pointer; font-size: 20px; margin-left: 8px; }
+    .pub-count:hover { color: #b91c1c; text-decoration: none; }
+    .dyn-pubs { fill: #334155; font-weight: 600; font-size: 20px; }
+    .dyn-auths { fill: #1d4ed8; font-weight: 600; font-size: 20px; }
+
+    svg { width: 100%; height: auto; display:block; }
+    
+    .sticky-close {
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: flex-end;
+      background: #fff;
+      padding: 6px 0;
+      z-index: 3;
+      border-bottom: 1px solid #eee;
+    }
+    .sticky-close button {
+      background: #0f172a;
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .sticky-close button:hover { background: #000; }
+
+    .info-box {
+      background: #f0f9ff;
+      border: 1px solid #0ea5e9;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 16px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a href="clusters_embedder.html" class="active">Clustering</a>
+ 
+  </div>
+
+  <h1>Publication Clustering Taxonomy <span style="color:#e11d48; font-size:12px;"> </span></h1>
+  
+  <div class="info-box">
+    <div style="color: #dc2626; margin-bottom: 8px;">
+      <strong>Red (N)</strong> = total unique publications in cluster.
+    </div>
+    <div style="color: #000000; margin-bottom: 8px;">
+      <strong>Gray [P:x]</strong> = unique publications for visible authors after Min Papers filter.
+    </div>
+    <div style="color: #0000FF;">
+      <strong>Blue {A:y}</strong> = count of unique visible authors.
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>
+      Layout
+      <select id="layoutSelect">
+        <option value="tree">Tree (Left-to-Right)</option>
+      </select>
+    </label>
+    <label>
+      Min Papers
+      <input type="number" id="minPapers" value="1" min="1" max="50">
+    </label>
+    <button onclick="updateVisualization()">Update</button>
+  </div>
+
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-content">
+      <div class="popup-header">
+        <div class="popup-title" id="popupTitle">Author Publications</div>
+        <button class="popup-close" onclick="closePopup()">&times;</button>
+      </div>
+      <div id="popupBody"></div>
+    </div>
+  </div>
+
+  <div id="mount"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script>
+    let rawData = null;
+    let minPapers = 1;
+
+    function showAuthorPublications(authorData) {
+      const popupTitle = document.getElementById('popupTitle');
+      const popupBody = document.getElementById('popupBody');
+      const popupOverlay = document.getElementById('popupOverlay');
+
+      popupTitle.textContent = `${authorData.name} - Publications`;
+
+      if (!authorData.all_publications || !Array.isArray(authorData.all_publications)) {
+        popupBody.innerHTML = `
+          <div style="color: #666; font-size: 11px;">
+            <strong>Author:</strong> ${authorData.name}<br>
+            <strong>Department:</strong> ${authorData.department || 'Unknown'}<br>
+            <strong>Papers in this cluster:</strong> ${authorData.dominant_papers || 0}<br>
+            <strong>Total papers:</strong> ${authorData.value || 0}<br><br>
+            <div style="color: #ff6b35;">Publication details are not available.</div>
+          </div>`;
+        popupOverlay.style.display = 'block';
+        return;
+      }
+
+      const pubsByYear = {};
+      authorData.all_publications.forEach(pub => {
+        const year = pub.year || 'Unknown';
+        if (!pubsByYear[year]) pubsByYear[year] = [];
+        pubsByYear[year].push(pub);
+      });
+
+      const sortedYears = Object.keys(pubsByYear).sort((a, b) => {
+        if (a === 'Unknown') return 1;
+        if (b === 'Unknown') return -1;
+        return parseInt(b) - parseInt(a);
+      });
+
+      let html = `<div style="margin-bottom: 8px; color: #666; font-size: 10px;">
+        <strong>Total:</strong> ${authorData.all_publications.length} |
+        <strong>This cluster:</strong> ${authorData.theme_publications ? authorData.theme_publications.length : 0} |
+        <strong>Dept:</strong> ${authorData.department || ''}
+      </div>`;
+
+      sortedYears.forEach(year => {
+        html += `<div style="margin-bottom: 12px;">
+          <h4 class="publication-year">${year} (${pubsByYear[year].length})</h4>`;
+
+        pubsByYear[year].forEach(pub => {
+          const isInThisCluster = authorData.theme_publications &&
+                                authorData.theme_publications.some(tp => tp.scopus_id === pub.scopus_id);
+          const highlight = isInThisCluster ? 'border-left-color: #ff6b35; background: #fff3f0;' : '';
+
+          html += `<div class="publication-item" style="${highlight}">
+            <div class="publication-title">${pub.title}</div>
+            <div class="publication-meta">
+              ID: ${pub.scopus_id}
+              ${isInThisCluster ? ' <span style="color: #ff6b35; font-weight: bold;">(Current)</span>' : ''}
+            </div>
+            <div class="cluster-info">📂 Cluster ${pub.cluster_id}</div>
+          </div>`;
+        });
+        html += '</div>';
+      });
+
+      popupBody.innerHTML = html;
+      popupOverlay.style.display = 'block';
+    }
+
+    function showClusterPublications(data) {
+      const popupTitle = document.getElementById('popupTitle');
+      const popupBody = document.getElementById('popupBody');
+      const popupOverlay = document.getElementById('popupOverlay');
+
+      const count = data.publication_count || 0;
+      const publications = data.all_publications || [];
+      
+      popupTitle.textContent = `Cluster: ${data.name} - ${count} Publications`;
+
+      if (publications.length === 0) {
+        popupBody.innerHTML = `
+          <div style="color: #666; font-size: 11px;">
+            <strong>Cluster:</strong> ${data.name}<br>
+            <strong>Total publications:</strong> ${count}<br><br>
+            <div style="color: #ff6b35;">No publication details available.</div>
+          </div>`;
+        popupOverlay.style.display = 'block';
+        return;
+      }
+
+      const pubsByYear = {};
+      publications.forEach(pub => {
+        const year = pub.year || 'Unknown';
+        if (!pubsByYear[year]) pubsByYear[year] = [];
+        pubsByYear[year].push(pub);
+      });
+
+      const sortedYears = Object.keys(pubsByYear).sort((a, b) => {
+        if (a === 'Unknown') return 1;
+        if (b === 'Unknown') return -1;
+        return parseInt(b) - parseInt(a);
+      });
+
+      let html = `<div class="sticky-close"><button type="button" onclick="closePopup()">Close ×</button></div>`;
+      html += `<div style="margin-bottom: 8px; color: #666; font-size: 10px;">
+        <strong>Cluster:</strong> ${data.name}<br>
+        <strong>Total publications:</strong> ${publications.length}
+      </div>`;
+
+      sortedYears.forEach(year => {
+        html += `<div style="margin-bottom: 12px;">
+          <h4 class="publication-year">${year} (${pubsByYear[year].length})</h4>`;
+
+        pubsByYear[year].forEach(pub => {
+          html += `<div class="publication-item">
+            <div class="publication-title">${pub.title || 'Untitled'}</div>
+            <div class="publication-meta">ID: ${pub.scopus_id}</div>
+          </div>`;
+        });
+        html += '</div>';
+      });
+
+      popupBody.innerHTML = html;
+      popupOverlay.style.display = 'block';
+    }
+
+    function closePopup() { 
+      document.getElementById('popupOverlay').style.display = 'none'; 
+    }
+    
+    document.getElementById('popupOverlay').addEventListener('click', function(e) { 
+      if (e.target === this) closePopup(); 
+    });
+
+    // Load data
+    const timestamp = Date.now();
+    fetch(`./clusters_embedder.json?v=${timestamp}`)
+      .then(r => r.json())
+      .then(data => { 
+        rawData = data; 
+        updateVisualization(); 
+      })
+      .catch(err => {
+        document.getElementById("mount").innerHTML = `
+          <div style="padding: 20px; text-align: center;">
+            <h3>Error loading data</h3>
+            <p>Make sure clusters_embedder.json is available and valid.</p>
+            <p>Error: ${err.message}</p>
+            <button onclick="location.reload()">Reload Page</button>
+          </div>`;
+      });
+
+    function updateVisualization() {
+      const minPapersInput = document.getElementById('minPapers');
+      minPapers = parseInt(minPapersInput.value) || 1;
+      document.getElementById("mount").innerHTML = "";
+      renderTreeVisualization();
+    }
+
+    function filterDataByMinPapers(data) {
+      const filtered = JSON.parse(JSON.stringify(data));
+      filtered.children = (filtered.children || []).map(cluster => {
+        cluster.children = (cluster.children || []).map(theme => {
+          // filter by min papers
+          let authors = (theme.children || []).filter(author => {
+            const v = author.dominant_papers || 0;
+            return v >= minPapers;
+          });
+          // deduplicate authors within theme (by id if available, else by name)
+          const seen = new Set();
+          authors = authors.filter(author => {
+            const key = String(author.author_id ?? author.id ?? author.name);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          theme.children = authors;
+          return theme;
+        }).filter(theme => theme.children && theme.children.length > 0);
+        return cluster;
+      }).filter(cluster => cluster.children && cluster.children.length > 0);
+      return filtered;
+    }
+
+    function computeDynamicMetrics(cluster) {
+      const clusterPubSet = new Set();
+      const clusterAuthorSet = new Set();
+
+      (cluster.children || []).forEach(theme => {
+        const themeAuthors = theme.children || [];
+        
+        themeAuthors.forEach(author => {
+          const aid = author.author_id || author.id || author.name;
+          if (aid != null) clusterAuthorSet.add(String(aid));
+
+          const pubs = author.theme_publications || [];
+          pubs.forEach(p => {
+            if (p && p.scopus_id != null) {
+              clusterPubSet.add(String(p.scopus_id));
+            }
+          });
+        });
+      });
+
+      return { 
+        pubs: clusterPubSet.size, 
+        authors: clusterAuthorSet.size 
+      };
+    }
+
+    function renderTreeVisualization() {
+      const filteredData = filterDataByMinPapers(rawData);
+      const clusters = filteredData.children || [];
+      const palette = d3.schemeTableau10.concat(d3.schemeSet3 || []);
+      const color = d3.scaleOrdinal(clusters.map(d => d.id), palette.slice(0, clusters.length));
+      const TREE_BOTTOM_PAD = 60;
+
+      const containerDiv = document.createElement("div");
+      containerDiv.style.display = "flex";
+      containerDiv.style.flexDirection = "column";
+      containerDiv.style.gap = "20px";
+      containerDiv.style.padding = "20px";
+
+      clusters.forEach((cluster) => {
+        // Create tree structure with cluster as root
+        const clusterTreeData = {
+          name: cluster.name, 
+          type: 'cluster', 
+          id: cluster.id, 
+          cluster_id: cluster.id,
+          children: cluster.children || [], 
+          publication_count: cluster.publication_count,
+          all_publications: cluster.all_publications
+        };
+
+        const root = d3.hierarchy(clusterTreeData);
+
+        root.sort((a, b) => {
+          const typeOrder = { 'cluster': 1, 'theme': 2, 'author': 3 };
+          const aType = typeOrder[a.data.type] || 4;
+          const bType = typeOrder[b.data.type] || 4;
+          if (aType !== bType) return d3.ascending(aType, bType);
+
+          if (a.data.type === 'author' && b.data.type === 'author') {
+            const aCount = a.data.dominant_papers || 0;
+            const bCount = b.data.dominant_papers || 0;
+            const byCount = d3.descending(aCount, bCount);
+            return byCount !== 0 ? byCount : d3.ascending((a.data.name || ''), (b.data.name || ''));
+          }
+          return d3.ascending((a.data.name || ''), (b.data.name || ''));
+        });
+
+        const treeWidth = 2200;
+        const dx = 20;
+        const tree = d3.tree().nodeSize([dx, treeWidth / (root.height + 1)]);
+        tree(root);
+
+        let x0 = Infinity, x1 = -x0;
+        root.each(d => { 
+          if (d.x > x1) x1 = d.x; 
+          if (d.x < x0) x0 = d.x; 
+        });
+        const height = x1 - x0 + dx * 2 + TREE_BOTTOM_PAD;
+
+        const svg = d3.create("svg")
+          .attr("width", treeWidth)
+          .attr("height", height)
+          .attr("viewBox", [-80, x0 - dx, treeWidth, height])
+          .attr("style", "max-width: 100%; height: auto; font: 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;");
+
+        // Links
+        svg.append("g")
+          .attr("fill", "none")
+          .attr("stroke-opacity", 0.5)
+          .attr("stroke-width", 2)
+          .selectAll("path")
+          .data(root.links())
+          .join("path")
+          .attr("stroke", color(cluster.id))
+          .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x));
+
+        // Nodes
+        const node = svg.append("g")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-width", 4)
+          .selectAll("g")
+          .data(root.descendants())
+          .join("g")
+          .attr("transform", d => `translate(${d.y},${d.x})`)
+          .style("cursor", d => d.data.type === 'author' ? 'pointer' : 'default')
+          .on("click", function (event, d) {
+            if (d.data.type === 'author') {
+              event.stopPropagation();
+              showAuthorPublications(d.data);
+            }
+          });
+
+        node.append("circle")
+          .attr("r", d => d.data.type === 'cluster' ? 8 : (d.data.type === 'theme' ? 5 : 3))
+          .attr("fill", d => {
+            if (d.data.type === 'cluster') return color(cluster.id);
+            if (d.data.type === 'theme') return d3.color(color(cluster.id)).darker(0.5);
+            return d3.color(color(cluster.id)).darker(1);
+          })
+          .attr("stroke", "white");
+
+        node.append("text")
+          .attr("dy", "0.31em")
+          .attr("x", d => (d.data.type === 'cluster' ? 15 : (d.data.type === 'theme' ? 12 : 20)))
+          .attr("text-anchor", "start")
+          .attr("stroke", "white")
+          .attr("stroke-width", d => d.data.type === 'author' ? 3 : 4)
+          .attr("paint-order", "stroke")
+          .style("font-weight", d => (d.data.type === 'cluster' ? 700 : (d.data.type === 'theme' ? 600 : 400)))
+          .style("font-size", d => (d.data.type === 'cluster' ? "24px" : (d.data.type === 'theme' ? "20px" : "18px")))
+          .style("fill", "black")
+          .text(d => {
+            if (d.data.type === 'cluster') return d.data.name;
+            if (d.data.type === 'theme') return "All Authors";
+            const dom = d.data.dominant_papers || 0;
+            const total = d.data.value || 0;
+            return `${d.data.name} (${dom}/${total})`;
+          })
+          .each(function (d) {
+            const text = d3.select(this);
+            const maxLength = d.data.type === 'cluster' ? 70 : (d.data.type === 'theme' ? 50 : 40);
+            const currentText = text.text();
+            if (currentText.length > maxLength) text.text(currentText.substring(0, maxLength) + "...");
+          });
+
+        // dynamic metrics on cluster node
+        setTimeout(() => {
+          const dyn = computeDynamicMetrics(cluster);
+
+          const nodeSel = svg.selectAll("g").filter(dd => dd.data && dd.data.type === 'cluster');
+
+          nodeSel.each(function(d) {
+            const nodeGroup = d3.select(this);
+            const publicationCount = d.data.publication_count || 0;
+            const baseX = 15;
+            const labelEl = nodeGroup.select('text').node();
+            const labelH = labelEl ? labelEl.getBBox().height : 24;
+            const gap = 8;
+            const baseY = labelH + gap;
+
+            const row = nodeGroup.append("g")
+              .attr("transform", `translate(${baseX}, ${baseY})`);
+
+            let xPos = 0;
+
+            if (publicationCount > 0) {
+              const red = row.append("text")
+                .text(`(${publicationCount})`)
+                .attr("x", xPos)
+                .attr("y", 0)
+                .attr("dy", "0.31em")
+                .attr("class", "pub-count")
+                .style("fill", "#dc2626")
+                .style("cursor", "pointer")
+                .on("click", function(ev) {
+                  ev.stopPropagation();
+                  showClusterPublications(d.data);
+                });
+
+              xPos += (red.node()?.getBBox()?.width || 0) + 8;
+            }
+
+            const gray = row.append("text")
+              .text(`[P:${dyn.pubs}]`)
+              .attr("x", xPos)
+              .attr("y", 0)
+              .attr("dy", "0.31em")
+              .attr("class", "dyn-pubs");
+
+            xPos += (gray.node()?.getBBox()?.width || 0) + 8;
+
+            const blue = row.append("text")
+              .text(`{A:${dyn.authors}}`)
+              .attr("x", xPos)
+              .attr("y", 0)
+              .attr("dy", "0.31em")
+              .attr("class", "dyn-auths");
+          });
+        }, 100);
+
+        containerDiv.appendChild(svg.node());
+      });
+
+      document.getElementById("mount").appendChild(containerDiv);
+    }
+
+    document.getElementById('minPapers').addEventListener('change', updateVisualization);
+  </script>
+</body>
+</html>
