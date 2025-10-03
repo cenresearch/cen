@@ -105,8 +105,7 @@
     <a href="radial.html">Radial Clusters</a>
     <a href="themes.html">Themes</a>
     <a href="classification.html">Classification</a>
-	<a href="globalclusters.html">Clustering</a>
-	<a href="global_clustering_table.html">Clustering-Details</a>
+	<a href="embedder_clusters.html">Clustering</a>
     <a href="authors.html">Authors</a>
     <a href="authors_clusters.html">Authors-Clusters</a>
     <a href="cen_collab.html">Collaborations</a>
@@ -347,7 +346,7 @@
     }
 
     const timestamp = Date.now();
-    fetch(`./clusters.json?v=${timestamp}`)
+    fetch(`./globalclusters.json?v=${timestamp}`)
       .then(r => r.json())
       .then(data => { rawData = data; updateVisualization(); })
       .catch(err => {
