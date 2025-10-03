@@ -1,0 +1,76 @@
+<!-- clusters_meta.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Clusters Meta</title>
+  <link href="https://unpkg.com/tabulator-tables@5.6.0/dist/css/tabulator.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/tabulator-tables@5.6.0/dist/js/tabulator.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    :root { --border:#e5e7eb; --fg:#111; --bg:#fff; }
+    body { font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:16px; color:var(--fg); background:var(--bg); }
+    .topnav{ position:sticky; top:0; z-index:1000; display:flex; gap:10px; background:#fff; border-bottom:1px solid var(--border); padding:10px 12px; margin:-16px -16px 16px -16px; }
+    .topnav a{ text-decoration:none; color:#334155; padding:6px 10px; border-radius:6px; font-weight:500; }
+    .topnav a:hover{ background:#f1f5f9; } .topnav a.active{ background:#111827; color:#fff; }
+    h1{ margin:10px 0 14px; }
+    .controls{ display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+    input,button{ padding:6px 10px; border:1px solid var(--border); border-radius:8px; }
+    #table{ border:1px solid var(--border); }
+    .wrap{ white-space:pre-wrap !important; word-wrap:break-word; line-height:1.35; }
+    .tabulator-row{ border-bottom:1px solid #d1d5db; }
+    .tabulator-row .tabulator-cell{ border-bottom:0 !important; padding-top:6px; padding-bottom:6px; vertical-align:top; }
+  </style>
+</head>
+<body>
+  <div class="topnav">
+    <a href="./">Home</a>
+    <a class="active" href="clusters_meta.html">Clusters Meta</a>
+    <a href="themes_meta.html">Themes Meta</a>
+  </div>
+
+  <h1>Clusters Meta</h1>
+
+  <div class="controls">
+    <input id="search" type="text" placeholder="Type to search">
+    <button id="download-xlsx">Download Excel</button>
+    <button id="download-csv">Download CSV</button>
+    <button id="clear">Clear filters</button>
+  </div>
+
+  <div id="table"></div>
+
+<script>
+const columns = [
+  {title:"ID", field:"id", sorter:"number", headerFilter:"input", width:100, hozAlign:"center"},
+  {title:"Name", field:"name", sorter:"string", headerFilter:"input", width:360, cssClass:"wrap", formatter:"textarea"},
+  {title:"Description", field:"description", sorter:"string", headerFilter:"input", width:800, cssClass:"wrap", formatter:"textarea"}
+];
+
+const table = new Tabulator("#table", {
+  layout:"fitDataStretch",
+  ajaxURL:"global_clusters_meta.json",
+  pagination:false,
+  columns,
+  variableHeight:true,
+  columnDefaults:{ vertAlign:"top" }
+});
+
+document.getElementById("search").addEventListener("input", e => {
+  const q = e.target.value.trim();
+  if (!q) return table.clearFilter(true);
+  table.setFilter(columns.map(c => ({field:c.field, type:"like", value:q})), "or");
+});
+document.getElementById("download-xlsx").addEventListener("click", () => {
+  table.download("xlsx", "clusters_meta.xlsx", {sheetName:"Clusters"});
+});
+document.getElementById("download-csv").addEventListener("click", () => {
+  table.download("csv", "clusters_meta.csv");
+});
+document.getElementById("clear").addEventListener("click", () => {
+  document.getElementById("search").value = ""; table.clearFilter(true);
+});
+</script>
+</body>
+</html>
