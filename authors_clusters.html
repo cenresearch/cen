@@ -24,7 +24,6 @@
     .tabulator-cell { vertical-align: top; }
     .wrap { white-space: normal !important; word-wrap: break-word; line-height: 1.45; }
 
-    /* one item per line inside the cell, small text */
     .clusters-list { margin:0; padding:0; list-style:none; column-count:1; }
     .clusters-list li { margin:2px 0; line-height:1.3; white-space: normal; font-size:12px; }
 
@@ -38,26 +37,78 @@
       text-decoration:none; color:#334155; padding:6px 10px;
       border-radius:6px; font-weight:500;
     }
-    .topnav a:hover{ background:#f1f5f9; }
-    .topnav a.active{ background:#111827; color:#fff; }
+
+    /* Classification group (green) */
+    .topnav a[href="./"],
+    .topnav a[href="radial.html"],
+    .topnav a[href="classification.html"],
+    .topnav a[href="clusters.html"],
+    .topnav a[href="authors_clusters.html"],
+    .topnav a[href="themes.html"] {
+        background-color: #10b981 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+    .topnav a[href="./"]:hover,
+    .topnav a[href="radial.html"]:hover,
+    .topnav a[href="classification.html"]:hover,
+    .topnav a[href="clusters.html"]:hover,
+    .topnav a[href="authors_clusters.html"]:hover,
+    .topnav a[href="themes.html"]:hover {
+        background-color: #0d946e !important;
+        color: white !important;
+    }
+
+    /* Global clustering group (blue) */
+    .topnav a[href="globalclusters.html"],
+    .topnav a[href="global_clustering_table.html"],
+    .topnav a[href="global_cluster_desc.html"],
+    .topnav a[href="global_themes_desc.html"] {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+    .topnav a[href="globalclusters.html"]:hover,
+    .topnav a[href="global_clustering_table.html"]:hover,
+    .topnav a[href="global_cluster_desc.html"]:hover,
+    .topnav a[href="global_themes_desc.html"]:hover {
+        background-color: #2563eb !important;
+        color: white !important;
+    }
+
+    /* FINAL RULE — active link red */
+    .topnav a.active {
+      background-color: #dc2626 !important;
+      color: #fff !important;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-
-  <div class="topnav">
-    <a href="./">Home</a>
-    <a href="clusters.html">Clusters</a>
-    <a href="radial.html">Radial Clusters</a>
-    <a href="themes.html">Themes</a>
-    <a href="classification.html">Classification</a>
+  <div class="topnav" id="topnav">
+    <a href="./">Classification</a>
+    <a href="radial.html">Radial Classification</a>
+    <a href="classification.html">Classification Details</a>
+    <a href="clusters.html">Predefined Clusters</a>
+    <a href="themes.html">Predefined Themes</a>
+    <a href="authors_clusters.html">Authors Clusters</a>
+    <a href="globalclusters.html">Clustering</a>
+    <a href="global_clustering_table.html">Clustering Details</a>
+    <a href="global_cluster_desc.html">LLM Clusters</a>
+    <a href="global_themes_desc.html">LLM Themes</a>
     <a href="authors.html">Authors</a>
-	<a href="authors_clusters.html">Authors-Clusters</a>
-	<a href="cen_collab.html">Collaborations</a>
-	<a href="metrics.html">Metrics</a>
-	<a href="process.html">Process Diagram</a>
+    <a href="cen_collab.html">Collaborations</a>
+    <a href="metrics.html">Metrics</a>
+    <a href="process.html">Process Diagram</a>
   </div>
 
-  <h1>AUS Authors — Faculty, College of Engineering</h1>
+  <h1>Authors Clusters Themes Mapping</h1>
 
   <div class="controls">
     <input id="search" type="text" placeholder="Type to search">
@@ -69,6 +120,7 @@
   <div id="table"></div>
 
 <script>
+/* highlight current page link + click feedback */
 (function(){
   const norm = u => (u || "").split('?')[0].replace('./','') || 'index.html';
   const current = norm(location.pathname.split('/').pop());
@@ -77,6 +129,10 @@
     if (current === target || (current === 'index.html' && (target === '' || target === './'))) {
       a.classList.add('active');
     }
+    a.addEventListener('click', function() {
+      document.querySelectorAll('.topnav a').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    });
   });
 })();
 
@@ -92,7 +148,6 @@ const columns = [
     cssClass:"wrap",
     formatter:function(cell){
       const v = cell.getValue() || "";
-      // split on ' ||| ' (safe delimiter from SQL)
       const parts = v.split(/\s*\|\|\|\s*/).filter(Boolean);
       return `<ul class="clusters-list">${parts.map(p => `<li>${p}</li>`).join("")}</ul>`;
     },

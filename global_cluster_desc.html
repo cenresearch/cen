@@ -21,16 +21,91 @@
     .wrap{ white-space:pre-wrap !important; word-wrap:break-word; line-height:1.35; }
     .tabulator-row{ border-bottom:1px solid #d1d5db; }
     .tabulator-row .tabulator-cell{ border-bottom:0 !important; padding-top:6px; padding-bottom:6px; vertical-align:top; }
+/* Make Classification group links the same color */
+.topnav a[href="./"],
+.topnav a[href="radial.html"],
+.topnav a[href="classification.html"],
+.topnav a[href="clusters.html"],
+.topnav a[href="authors_clusters.html"],
+.topnav a[href="themes.html"] {
+    background-color: #10b981 !important; /* Blue background */
+    color: white !important;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.topnav a[href="./"]:hover,
+.topnav a[href="radial.html"]:hover,
+.topnav a[href="classification.html"]:hover,
+.topnav a[href="clusters.html"]:hover,
+.topnav a[href="authors_clusters.html"]:hover,
+.topnav a[href="themes.html"]:hover {
+    background-color: #10b981 !important; /* Darker blue on hover */
+    color: white !important;
+}
+
+.topnav a[href="./"].active,
+.topnav a[href="radial.html"].active,
+.topnav a[href="classification.html"].active,
+.topnav a[href="clusters.html"].active,
+.topnav a[href="authors_clusters.html"].active,
+.topnav a[href="themes.html"].active {
+    background-color: #10b981 !important; /* Even darker blue when active */
+    color: white !important;
+}
+
+/* Make Global Clustering links blue */
+.topnav a[href="globalclusters.html"],
+.topnav a[href="global_clustering_table.html"],
+.topnav a[href="global_cluster_desc.html"],
+.topnav a[href="global_themes_desc.html"] {
+    background-color: #3b82f6 !important; /* Blue background */
+    color: white !important;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin: 0 2px;
+}
+
+.topnav a[href="globalclusters.html"]:hover,
+.topnav a[href="global_clustering_table.html"]:hover,
+.topnav a[href="global_cluster_desc.html"]:hover,
+.topnav a[href="global_themes_desc.html"]:hover {
+    background-color: #2563eb !important; /* Darker blue on hover */
+    color: white !important;
+}
+
+.topnav a[href="globalclusters.html"].active,
+.topnav a[href="global_clustering_table.html"].active,
+.topnav a[href="global_cluster_desc.html"].active,
+.topnav a[href="global_themes_desc.html"].active {
+    background-color: #1e40af !important; /* Even darker blue when active */
+    color: white !important;
+}
+	
+	
+
   </style>
 </head>
 <body>
   <div class="topnav">
-    <a href="./">Home</a>
-    <a class="active" href="clusters_meta.html">Clusters Meta</a>
-    <a href="themes_meta.html">Themes Meta</a>
+    <a href="./">Classification</a>
+	<a href="radial.html">Radial Classification</a>
+	<a href="classification.html">Classification Details</a>
+    <a href="clusters.html">Predefined Clusters</a>    
+    <a href="themes.html">Predefined Themes</a>	
+	<a href="authors_clusters.html">Authors Clusters</a>
+	<a href="globalclusters.html">Clustering</a>
+	<a href="global_clustering_table.html">Clustering Details</a>
+	<a href="global_cluster_desc.html">LLM Clusters</a>
+	<a href="global_themes_desc.html">LLM Themes</a>
+    <a href="authors.html">Authors</a>
+    <a href="cen_collab.html">Collaborations</a>
+    <a href="metrics.html">Metrics</a>
+    <a href="process.html">Process Diagram</a>
   </div>
 
-  <h1>Clusters Meta</h1>
+  <h1>LLM Defined Clusters</h1>
 
   <div class="controls">
     <input id="search" type="text" placeholder="Type to search">

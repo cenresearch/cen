@@ -18,14 +18,10 @@
     input, button, select { padding: 6px 10px; border:1px solid var(--border); border-radius:8px; }
     button { cursor: pointer; }
 
-    /* Tabulator table borders */
     #table { border: 1px solid var(--border); }
     .tabulator { border: none; }
     .tabulator-header { border-bottom: 1px solid var(--border); }
-    /* thin grey lines between rows */
     .tabulator-row { border-bottom: 1px solid #d1d5db; }
-
-    /* wrap long text in description cells */
     .tabulator-cell.wrap { white-space: normal !important; word-wrap: break-word; line-height: 1.4; }
 
     /* Top nav */
@@ -33,33 +29,86 @@
       position: sticky; top: 0; z-index: 1000;
       display:flex; gap:10px; align-items:center;
       background:#fff; border-bottom:1px solid var(--border);
-      padding:10px 12px; margin:-16px -16px 16px -16px; /* stretch edge-to-edge */
+      padding:10px 12px; margin:-16px -16px 16px -16px;
     }
     .topnav a{
       text-decoration:none; color:#334155; padding:6px 10px;
       border-radius:6px; font-weight:500;
     }
-    .topnav a:hover{ background:#f1f5f9; }
-    .topnav a.active{ background:#111827; color:#fff; }
+
+    /* Classification group (green) */
+    .topnav a[href="./"],
+    .topnav a[href="radial.html"],
+    .topnav a[href="classification.html"],
+    .topnav a[href="clusters.html"],
+    .topnav a[href="authors_clusters.html"],
+    .topnav a[href="themes.html"] {
+        background-color: #10b981 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+
+    .topnav a[href="./"]:hover,
+    .topnav a[href="radial.html"]:hover,
+    .topnav a[href="classification.html"]:hover,
+    .topnav a[href="clusters.html"]:hover,
+    .topnav a[href="authors_clusters.html"]:hover,
+    .topnav a[href="themes.html"]:hover {
+        background-color: #0d946e !important;
+        color: white !important;
+    }
+
+    /* Global clustering group (blue) */
+    .topnav a[href="globalclusters.html"],
+    .topnav a[href="global_clustering_table.html"],
+    .topnav a[href="global_cluster_desc.html"],
+    .topnav a[href="global_themes_desc.html"] {
+        background-color: #3b82f6 !important;
+        color: white !important;
+        padding: 4px 10px;
+        border-radius: 8px;
+        margin: 0 2px;
+    }
+
+    .topnav a[href="globalclusters.html"]:hover,
+    .topnav a[href="global_clustering_table.html"]:hover,
+    .topnav a[href="global_cluster_desc.html"]:hover,
+    .topnav a[href="global_themes_desc.html"]:hover {
+        background-color: #2563eb !important;
+        color: white !important;
+    }
+
+    /* FINAL RULE — active link red (overrides all) */
+    .topnav a.active {
+      background-color: #dc2626 !important;
+      color: #fff !important;
+      font-weight: bold;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
-
-  <!-- Shared top navigation -->
-  <div class="topnav">
-    <a href="./">Home</a>
-    <a href="clusters.html">Clusters</a>
-	<a href="radial.html">Radial Clusters</a>
-    <a href="themes.html">Themes</a>
-    <a href="classification.html">Classification</a>
+  <div class="topnav" id="topnav">
+    <a href="./">Classification</a>
+    <a href="radial.html">Radial Classification</a>
+    <a href="classification.html">Classification Details</a>
+    <a href="clusters.html">Predefined Clusters</a>
+    <a href="themes.html">Predefined Themes</a>
+    <a href="authors_clusters.html">Authors Clusters</a>
+    <a href="globalclusters.html">Clustering</a>
+    <a href="global_clustering_table.html">Clustering Details</a>
+    <a href="global_cluster_desc.html">LLM Clusters</a>
+    <a href="global_themes_desc.html">LLM Themes</a>
     <a href="authors.html">Authors</a>
-	<a href="authors_clusters.html">Authors-Clusters</a>
-	<a href="cen_collab.html">Collaborations</a>
-	<a href="metrics.html">Metrics</a>
-	<a href="process.html">Process Diagram</a>
+    <a href="cen_collab.html">Collaborations</a>
+    <a href="metrics.html">Metrics</a>
+    <a href="process.html">Process Diagram</a>
   </div>
 
-  <h1>Clusters</h1>
+  <h1>Predefined Clusters</h1>
 
   <div class="controls">
     <input id="search" type="text" placeholder="Type to search">
@@ -71,7 +120,7 @@
   <div id="table"></div>
 
   <script>
-    // highlight the current page link in the top nav
+    // highlight current page link in the top nav
     (function(){
       const norm = u => (u || "").split('?')[0].replace('./','') || 'index.html';
       const current = norm(location.pathname.split('/').pop());
@@ -80,34 +129,28 @@
         if (current === target || (current === 'index.html' && (target === '' || target === './'))) {
           a.classList.add('active');
         }
+        a.addEventListener('click', function() {
+          document.querySelectorAll('.topnav a').forEach(l => l.classList.remove('active'));
+          this.classList.add('active');
+        });
       });
     })();
 
     const columns = [
-      {title:"cluster id", field:"cluster_id", sorter:"number", headerFilter:"input", width:110, hozAlign:"center", headerHozAlign:"center"},
-      {title:"name", field:"name", sorter:"string", headerFilter:"input", width:280, headerHozAlign:"center"},
-      {
-        title:"description",
-        field:"description",
-        sorter:"string",
-        headerFilter:"input",
-        cssClass:"wrap",
-        formatter:"textarea",
-        widthGrow:3
-      },
+      {title:"Cluster ID", field:"cluster_id", sorter:"number", headerFilter:"input", width:110, hozAlign:"center", headerHozAlign:"center"},
+      {title:"Name", field:"name", sorter:"string", headerFilter:"input", width:280, headerHozAlign:"center"},
+      {title:"Description", field:"description", sorter:"string", headerFilter:"input", cssClass:"wrap", formatter:"textarea", widthGrow:3},
     ];
 
     const table = new Tabulator("#table", {
-      // no height -> no internal scroll; page scrolls naturally
       layout:"fitDataStretch",
-      ajaxURL:"aus_clusters.json",   // expects fields: cluster_id, name, description
-      pagination:false,              // no pagination; show all rows
+      ajaxURL:"aus_clusters.json",
+      pagination:false,
       columns,
       columnDefaults:{ vertAlign:"top" },
       variableHeight:true
     });
 
-    // Global search
     const searchInput = document.getElementById("search");
     searchInput.addEventListener("input", () => {
       const q = searchInput.value.trim();
@@ -116,7 +159,6 @@
       table.setFilter(fields.map(f => ({field:f, type:"like", value:q})), "or");
     });
 
-    // Downloads
     document.getElementById("download-xlsx").addEventListener("click", () => {
       table.download("xlsx", "aus_clusters.xlsx", {sheetName:"Clusters"});
     });
@@ -124,7 +166,6 @@
       table.download("csv", "aus_clusters.csv");
     });
 
-    // Clear filters
     document.getElementById("clear").addEventListener("click", () => {
       searchInput.value = "";
       table.clearFilter(true);

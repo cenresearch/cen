@@ -15,7 +15,6 @@
     .topnav { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); display: flex; gap: 16px; padding: 10px 16px; z-index: 2000; }
     .topnav a { text-decoration: none; color: #111; font-size: 14px; font-weight: 500; }
     .topnav a:hover { color: #007acc; }
-    .topnav a.active { background-color: #111; color: white; font-weight: bold; padding: 4px 10px; border-radius: 8px; }
 
     .controls { padding: 14px; background: #f9fafb; border-bottom: 1px solid var(--border); }
     .controls label { margin-right: 20px; font-size: 14px; }
@@ -62,19 +61,12 @@
     table.matrix { table-layout: fixed; border-collapse: collapse; font-size: 11px; width: 100%; }
     table.matrix th, table.matrix td { border:1px solid #e5e7eb; padding:2px 3px; }
     table.matrix td { width: 28px; min-width: 28px; max-width: 28px; height: 22px; line-height: 1.0; text-align: center; }
-    table.matrix th { background:#f9fafb; text-align:left; position:sticky; top:0; white-space:nowrap; font-size: 11px; } /* smaller names */
-    table.matrix td.self { font-weight:700; }
-    table.matrix td.zero { color:#6b7280; }
-	table.matrix thead th {
-	  white-space: normal;   /* allow wrapping */
-	  line-height: 1.1;      /* tighter lines */
-	  text-align: center;    /* optional */
-	}
+    table.matrix th { background:#f9fafb; text-align:left; position:sticky; top:0; white-space:nowrap; font-size: 11px; }
+	table.matrix thead th { white-space: normal; line-height: 1.1; text-align: center; }
     .matrix-caption { margin:6px 0 10px 0; color:#334155; font-size:12px; }
 
     svg { width: 100%; height: auto; display:block; }
-	
-	/* sticky close button inside popup body */
+
 	.sticky-close {
 	  position: sticky;
 	  top: 0;
@@ -96,55 +88,104 @@
 	}
 	.sticky-close button:hover { background: #000; }
 
+	/* Classification group (green) */
+	.topnav a[href="./"],
+	.topnav a[href="radial.html"],
+	.topnav a[href="classification.html"],
+	.topnav a[href="clusters.html"],
+	.topnav a[href="authors_clusters.html"],
+	.topnav a[href="themes.html"] {
+	    background-color: #10b981 !important;
+	    color: white !important;
+	    padding: 4px 10px;
+	    border-radius: 8px;
+	    margin: 0 2px;
+	}
+
+	.topnav a[href="./"]:hover,
+	.topnav a[href="radial.html"]:hover,
+	.topnav a[href="classification.html"]:hover,
+	.topnav a[href="clusters.html"]:hover,
+	.topnav a[href="authors_clusters.html"]:hover,
+	.topnav a[href="themes.html"]:hover {
+	    background-color: #0d946e !important;
+	    color: white !important;
+	}
+
+	/* Global clustering group (blue) */
+	.topnav a[href="globalclusters.html"],
+	.topnav a[href="global_clustering_table.html"],
+	.topnav a[href="global_cluster_desc.html"],
+	.topnav a[href="global_themes_desc.html"] {
+	    background-color: #3b82f6 !important;
+	    color: white !important;
+	    padding: 4px 10px;
+	    border-radius: 8px;
+	    margin: 0 2px;
+	}
+
+	.topnav a[href="globalclusters.html"]:hover,
+	.topnav a[href="global_clustering_table.html"]:hover,
+	.topnav a[href="global_cluster_desc.html"]:hover,
+	.topnav a[href="global_themes_desc.html"]:hover {
+	    background-color: #2563eb !important;
+	    color: white !important;
+	}
+
+	/* FINAL RULE — active link turns red */
+	.topnav a.active {
+	  background-color: #dc2626 !important;
+	  color: #fff !important;
+	  font-weight: bold;
+	  padding: 4px 10px;
+	  border-radius: 8px;
+	}
   </style>
 </head>
 <body>
   <div class="topnav">
-    <a href="./">Home</a>
-    <a href="clusters.html">Clusters</a>
-    <a href="radial.html">Radial Clusters</a>
-    <a href="themes.html">Themes</a>
-    <a href="classification.html">Classification</a>
+    <a href="./">Classification</a>
+	<a href="radial.html">Radial Classification</a>
+	<a href="classification.html">Classification Details</a>
+    <a href="clusters.html">Predefined Clusters</a>    
+    <a href="themes.html">Predefined Themes</a>	
+	<a href="authors_clusters.html">Authors Clusters</a>
 	<a href="globalclusters.html">Clustering</a>
-	<a href="global_clustering_table.html">Clustering-Details</a>
-	<a href="global_cluster_desc.html">GlobalClusterDesc</a>
-	<a href="global_themes_desc.html">GlobalThemesDesc</a>
+	<a href="global_clustering_table.html">Clustering Details</a>
+	<a href="global_cluster_desc.html">LLM Clusters</a>
+	<a href="global_themes_desc.html">LLM Themes</a>
     <a href="authors.html">Authors</a>
-    <a href="authors_clusters.html">Authors-Clusters</a>
     <a href="cen_collab.html">Collaborations</a>
     <a href="metrics.html">Metrics</a>
     <a href="process.html">Process Diagram</a>
   </div>
 
-  <h1>Clusters - Publications: 1/1/2022 - 15/8/2025 <span style="color:#e11d48; font-size:12px;">click on author names for details</span></h1>
-  
+  <h1>Research Clusters (predefined clusters-themes): 1/1/2022 - 15/8/2025 
+    <span style="color:#e11d48; font-size:12px;">click on author names for details</span>
+  </h1>
 
-  
- <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px; font-size: 16px;">
-    <div style="color: #dc2626; margin-bottom: 8px;">
-      <strong>Red (N)</strong> = total unique publications in data.
-    </div>
-    <div style="color: #000000; margin-bottom: 8px;">
-      <strong>Gray [P:x]</strong> = unique publications for visible authors after Min Papers filter.
-    </div>
-    <div style="color: #0000FF; margin-bottom: 8px;">
-      <strong>Blue {A:y}</strong> = count of unique visible authors.
-    </div>
-	<div style="color: #0ea5e9;">
-      <strong>[matrix] </strong> = pairwise shared counts.
-    </div>
-</div>
+  <div style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 12px; margin: 16px; font-size: 16px;">
+    <div style="color: #dc2626; margin-bottom: 8px;"><strong>Red (N)</strong> = total unique publications in data.</div>
+    <div style="color: #000000; margin-bottom: 8px;"><strong>Gray [P:x]</strong> = unique publications for visible authors after Min Papers filter.</div>
+    <div style="color: #0000FF; margin-bottom: 8px;"><strong>Blue {A:y}</strong> = count of unique visible authors.</div>
+	<div style="color: #0ea5e9;"><strong>[matrix]</strong> = pairwise shared counts.</div>
+  </div>
 
   <script>
-    (function () {
-      const current = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
-      document.querySelectorAll('.topnav a').forEach(a => {
-        const href = (a.getAttribute('href') || '').split('?')[0];
-        const target = (href.split('/').pop() || 'index.html');
-        if (target === current || (href === './' && (current === '' || current === 'index.html'))) a.classList.add('active');
+    const current = window.location.pathname.split('/').pop().split('?')[0] || 'index.html';
+    document.querySelectorAll('.topnav a').forEach(link => {
+      const href = link.getAttribute('href').split('?')[0];
+      const target = href.split('/').pop() || 'index.html';
+      if (target === current) link.classList.add('active');
+      link.addEventListener('click', function() {
+        document.querySelectorAll('.topnav a').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
       });
-    })();
+    });
   </script>
+</body>
+</html>
+
 
   <div class="controls">
     <label>
